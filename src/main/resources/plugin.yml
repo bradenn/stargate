@@ -1,0 +1,14 @@
+name: Stargate
+main: com.bradenn.stargates.Stargate
+version: 1.0
+author: bradencn
+website: bradenn.com
+api-version: 1.17
+commands:
+  stargate:
+    description: Register a stargate
+    usage: /stargate
+    aliases: sg
+permissions:
+  stargate:
+    default: true
