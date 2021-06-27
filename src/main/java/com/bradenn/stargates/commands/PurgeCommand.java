@@ -1,23 +1,23 @@
 package com.bradenn.stargates.commands;
 
+import com.bradenn.stargates.Database;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Stargate;
 import org.bukkit.entity.Player;
 
-public class CreateCommand implements SubCommand {
+public class PurgeCommand implements SubCommand {
 
     public String getLabel() {
-        return "create";
+        return "purge";
     }
 
     public String getDescription() {
-        return "Build and register a stargate.";
+        return "Destroy all stargates.";
     }
 
     public void onRun(Player player, String[] args) throws Exception {
-        if (args.length >= 2) {
-            String name = args[1];
-            Stargate stargate = new Stargate(name, player.getLocation(), Orientation.fromYaw(player.getLocation().getYaw()));
+        if (args.length >= 1) {
+            Stargate.destroyAll();
         }else{
             throw new Exception("Insufficient arguments.");
         }

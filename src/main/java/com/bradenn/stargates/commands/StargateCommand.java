@@ -35,6 +35,7 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         registerSubCommand(new RegisterCommand());
         registerSubCommand(new LocateCommand());
         registerSubCommand(new DialerCommand());
+        registerSubCommand(new PurgeCommand());
     }
 
     @Override
@@ -45,19 +46,27 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         }
 
         Player player = (Player) sender;
-        designateCommand(player, args);
+        try {
+            designateCommand(player, args);
+        } catch (Exception exception) {
+            handleError(player, exception);
+        }
 
         return true;
     }
 
-    private void designateCommand(Player player, String[] args) {
+    private void designateCommand(Player player, String[] args) throws Exception {
         int argsCount = args.length;
         if (argsCount >= 1) {
             String commandLabel = args[0];
             getSubCommand(commandLabel).onRun(player, args);
-        }else{
+        } else {
             helpCommand.onRun(player, args);
         }
+    }
+
+    private void handleError(Player player, Exception exception) {
+        player.sendMessage(exception.getMessage());
     }
 
     @Override

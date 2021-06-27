@@ -4,7 +4,7 @@ import org.bukkit.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 
-import java.util.Date;
+import java.util.Objects;
 import java.util.Random;
 
 
@@ -18,48 +18,45 @@ public class ParticleEffects {
         World world = Bukkit.getWorld("world");
         assert world != null;
 
+
         Color color = Color.fromRGB(0, 128, 255);
         Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1);
-        for (double width = boundingBox.getMinX(); width < boundingBox.getMaxX(); width += 1) {
-            for (double height = boundingBox.getMinZ(); height < boundingBox.getMaxZ(); height += 1) {
-                Location point = new Location(world, width, boundingBox.getMaxY(), height);
+        new BukkitRunnable(){
+            @Override
+            public void run() {
 
-                world.spawnParticle(Particle.REDSTONE, point.getBlock().getLocation().add(0.5, 0, 0.5), 1, dustOptions);
+                for(double x = boundingBox.getMinX(); x <= boundingBox.getMaxX(); x+=0.5){
+                    for(double y = boundingBox.getMinY(); y <= boundingBox.getMaxY(); y+=0.5){
+                        for(double z = boundingBox.getMinZ(); z <= boundingBox.getMaxZ(); z+=0.5){
+                            Location l = new Location(world, x, y, z);
+                            world.spawnParticle(Particle.REDSTONE, l, 1, dustOptions);
+                        }
+                    }
+                }
+
             }
-        }
+        }.runTaskTimer(Main.plugin, 2, 2);
+
+
+//        world.spawnParticle(Particle.REDSTONE, boundingBox.getCenter(), 1, dustOptions);
 
     }
 
-    public static void spawnPortal(Location center) {
-        World world = Bukkit.getWorld("world");
-
-        Color color = Color.fromRGB(0, 128, 255);
-        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleColor.BLUE.getColor(), 2);
+    public static void drawAccretionDisk(Location center) {
+        World world = center.getWorld();
+        if(Objects.isNull(world)) return;
         Random random = new Random();
-        random.setSeed(new Date().getTime());
-        new BukkitRunnable() {
-            double j = 0;
 
-            @Override
-            public void run() {
-                double particles = j * 3 * Math.E;
-
-                for (double i = 0; i < particles; i += 0.5) {
-                    double delta = (Math.PI * 2) / particles;
-                    double posX = Math.cos(delta * i) * j;
-                    double posY = Math.sin(delta * i) * j;
-
-                    world.spawnParticle(Particle.REDSTONE, center.clone().add(posX, posY, 0), 1, blueDust);
-                }
-
-
-                j += 0.1;
-                if (j >= 2.75) {
-                    cancel();
-                }
+        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleColor.BLUE.getColor(), 2);
+        for (double j = 0; j < 3; j += 0.2) {
+            double particleCount = 4 * j;
+            for (double i = 0; i < particleCount; i += 0.2) {
+                double delta = (Math.PI * 2) / particleCount;
+                double posX = Math.cos(delta * i) * j;
+                double posY = Math.sin(delta * i) * j;
+                world.spawnParticle(Particle.REDSTONE, center.clone().add(posX, posY, 0), 1, blueDust);
             }
-
-        }.runTaskTimer(Stargate.plugin, 0, 1);
+        }
     }
 
     public static void idlePortal(Location location) {
@@ -90,7 +87,7 @@ public class ParticleEffects {
                 }
             }
 
-        }.runTaskTimer(Stargate.plugin, 0, 1);
+        }.runTaskTimer(Main.plugin, 0, 1);
 
     }
 

@@ -7,6 +7,7 @@ import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 
@@ -51,6 +52,7 @@ public class BlockStand {
         EntityEquipment entityEquipment = armorStand.getEquipment();
         if (Objects.isNull(entityEquipment)) return;
 
+
         entityEquipment.setItemInMainHand(new ItemStack(material));
         armorStand.setRightArmPose(angle);
         armorStand.setRotation(yaw, pitch);
@@ -76,7 +78,7 @@ public class BlockStand {
         entityEquipment.setHelmet(new ItemStack(material));
         armorStand.setHeadPose(angle);
         armorStand.setRotation(yaw, pitch);
-
+        armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
         armorStand.setCustomName(uuid.toString());
         armorStand.setVisible(false);
         armorStand.setGravity(false);
@@ -87,6 +89,16 @@ public class BlockStand {
         armorStand.setCollidable(false);
         armorStand.setCanPickupItems(false);
         armorStand.setSilent(true);
+    }
+
+    public static boolean isArmorStand(Entity entity, UUID uuid) {
+        if (entity instanceof ArmorStand) {
+            ArmorStand armorStand = (ArmorStand) entity;
+            if (!armorStand.isVisible() && !Objects.isNull(armorStand.getCustomName())) {
+                return armorStand.getCustomName().equalsIgnoreCase(uuid.toString());
+            }
+        }
+        return false;
     }
 
 

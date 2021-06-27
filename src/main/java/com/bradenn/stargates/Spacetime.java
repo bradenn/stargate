@@ -1,18 +1,21 @@
 package com.bradenn.stargates;
 
-import com.bradenn.stargates.structures.GateStructure;
+import com.bradenn.stargates.structures.Stargate;
+import org.bukkit.Bukkit;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Spacetime {
 
-    private final Map<UUID, UUID> wormholes;
+    private final Map<Stargate, Stargate> wormholes;
     private final Plugin plugin;
 
     public Spacetime(Plugin plugin) {
@@ -27,35 +30,69 @@ public class Spacetime {
             public void run() {
                 wormholes.forEach(spacetime::updateWormhole);
             }
-        }.runTaskTimer(plugin, 1, 2);
+        }.runTaskTimer(plugin, 0, 3);
     }
 
-    public void updateWormhole(UUID outgoing, UUID target) {
-//        Gate outgoingGate =
-//        ParticleEffects.spawnPortal(outgoingGate.getLocation());
-//        Gate targetGate = new Gate(target);
-//        ParticleEffects.spawnPortal(targetGate.getLocation());
+    public void updateWormhole(Stargate outgoing, Stargate target) {
+
+        try {
+            outgoing.drawIdle();
+            target.drawIdle();
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+        }
+
     }
 
-    public void transportPlayer(Player player, String outgoing) {
-//        if (wormholes.containsKey(outgoing)) {
-//            Gate targetGate = new Gate(wormholes.get(outgoing));
-//            player.teleport(targetGate.getLocation());
-//        }
+    public void intersectsPortal(Player player) {
+        wormholes.forEach((from, to) -> {
+            try {
+                if (from.getBoundingBox().overlaps(player.getBoundingBox())) {
+                    to.teleportPlayer(player);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        });
     }
 
-    private boolean isBusy(String gate) {
+    private boolean isBusy(Stargate gate) {
         return (wormholes.containsKey(gate) || wormholes.containsValue(gate));
     }
 
-    public void establishWormhole(String outgoing, String target) throws Exception {
+    public void establishWormhole(Stargate outgoing, Stargate target) throws Exception {
         if (isBusy(outgoing)) {
             throw new Exception("Outgoing Stargate is busy.");
         } else if (isBusy(target)) {
             throw new Exception("Target Stargate is busy.");
         }
 
-//        wormholes.put(outgoing, target);
+        wormholes.put(outgoing, target);
+
+        BossBar bossBar = Bukkit.getServer().createBossBar(String.format("Stargate: %s → %s", outgoing.getName(), target.getName()), BarColor.WHITE, BarStyle.SEGMENTED_12);
+
+        for (Entity entity : outgoing.getLocation().getWorld().getNearbyEntities(outgoing.getLocation(), 10, 10, 10)) {
+            if (entity instanceof Player) {
+                bossBar.addPlayer((Player) entity);
+            }
+        }
+
+        new BukkitRunnable() {
+            double countdown = 12;
+
+            @Override
+            public void run() {
+                countdown-=1;
+                bossBar.setProgress(countdown/12);
+                if (countdown <= 0) {
+                    wormholes.remove(outgoing, target);
+                    bossBar.removeAll();
+                    cancel();
+                }
+            }
+        }.runTaskTimer(Main.plugin, 20, 20);
+
     }
 
 

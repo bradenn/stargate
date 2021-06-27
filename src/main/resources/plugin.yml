@@ -1,5 +1,5 @@
 name: Stargate
-main: com.bradenn.stargates.Stargate
+main: com.bradenn.stargates.Main
 version: 1.0
 author: bradencn
 website: bradenn.com
