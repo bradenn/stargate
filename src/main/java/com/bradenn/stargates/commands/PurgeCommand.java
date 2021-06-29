@@ -1,7 +1,6 @@
 package com.bradenn.stargates.commands;
 
-import com.bradenn.stargates.Database;
-import com.bradenn.stargates.structures.Orientation;
+import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.structures.Stargate;
 import org.bukkit.entity.Player;
 
@@ -15,17 +14,13 @@ public class PurgeCommand implements SubCommand {
         return "Destroy all stargates.";
     }
 
-    public void onRun(Player player, String[] args) throws Exception {
+    public void run(Player player, String[] args) throws Exception {
         if (args.length >= 1) {
-            Stargate.destroyAll();
-        }else{
+            int stargateCount = Stargate.getAll().size();
+            Stargate.terminateAll();
+            Messages.sendInfo(player, "%d stargates have been destroyed.", stargateCount);
+        } else {
             throw new Exception("Insufficient arguments.");
         }
     }
-
-
-    private void error() {
-
-    }
-
 }

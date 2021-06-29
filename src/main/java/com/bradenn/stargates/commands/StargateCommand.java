@@ -1,5 +1,6 @@
 package com.bradenn.stargates.commands;
 
+import com.bradenn.stargates.cosmetics.Messages;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -30,12 +31,10 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         }
 
         registerSubCommand(helpCommand);
-
         registerSubCommand(new CreateCommand());
-        registerSubCommand(new RegisterCommand());
-        registerSubCommand(new LocateCommand());
-        registerSubCommand(new DialerCommand());
+        registerSubCommand(new RemoveCommand());
         registerSubCommand(new PurgeCommand());
+        registerSubCommand(new RebuildCommand());
     }
 
     @Override
@@ -46,6 +45,7 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         }
 
         Player player = (Player) sender;
+
         try {
             designateCommand(player, args);
         } catch (Exception exception) {
@@ -59,14 +59,15 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         int argsCount = args.length;
         if (argsCount >= 1) {
             String commandLabel = args[0];
-            getSubCommand(commandLabel).onRun(player, args);
+            SubCommand subCommand = getSubCommand(commandLabel);
+            subCommand.run(player, args);
         } else {
-            helpCommand.onRun(player, args);
+            helpCommand.run(player, args);
         }
     }
 
     private void handleError(Player player, Exception exception) {
-        player.sendMessage(exception.getMessage());
+        Messages.sendError(player, exception.getMessage());
     }
 
     @Override

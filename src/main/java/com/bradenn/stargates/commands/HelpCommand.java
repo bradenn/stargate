@@ -12,12 +12,8 @@ public class HelpCommand implements SubCommand {
         return "Get help with the stargate plugin.";
     }
 
-    public void onRun(Player player, String[] args) {
+    public void run(Player player, String[] args) {
         player.sendMessage("Here is your help: Suck a duck.");
-    }
-
-    private void error() {
-
     }
 
 }

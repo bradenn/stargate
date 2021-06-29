@@ -4,11 +4,10 @@ import org.bukkit.entity.Player;
 
 public interface SubCommand {
 
-    void onRun(Player player, String[] args) throws Exception;
-
     String getLabel();
 
     String getDescription();
 
+    void run(Player player, String[] args) throws Exception;
 
 }

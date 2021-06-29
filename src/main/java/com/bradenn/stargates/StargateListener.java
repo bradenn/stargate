@@ -1,9 +1,13 @@
 package com.bradenn.stargates;
 
-import com.bradenn.stargates.structures.*;
+import com.bradenn.stargates.cosmetics.Messages;
+import com.bradenn.stargates.runtime.Orchestrator;
+import com.bradenn.stargates.runtime.Wormhole;
+import com.bradenn.stargates.structures.Dialer;
+import com.bradenn.stargates.structures.Stargate;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -12,11 +16,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,10 +30,28 @@ public class StargateListener implements Listener {
     @EventHandler
     public void playerEnterPortal(PlayerMoveEvent e) {
         Player player = e.getPlayer();
-        Main.spacetime.intersectsPortal(player);
-//        e.getPlayer().sendMessage(Orientation.fromYaw(e.getPlayer().getLocation().getYaw()).toString());
-
+//        Wormhole.checkIntersection(player);
     }
+
+//    public void chunkLoad(ChunkLoadEvent e) {
+//        if (!e.isNewChunk()) {
+//            Arrays.stream(e.getChunk().getEntities()).filter(entity -> {
+//                if (!entity.isPersistent()) return false;
+//                if (entity.getCustomName() == null) return false;
+//
+//                if (entity.getCustomName().length() == 32) {
+//                    return true;
+//                }
+//
+//                return false;
+//            }).map(entity -> {
+//                UUID uuid = UUID.fromString(entity.getCustomName());
+//                return uuid;
+//            }).forEach(uuid -> {
+//                Stargate.fromUUID()
+//            });
+//        }
+//    }
 
     @EventHandler
     public void entityInteract(PlayerArmorStandManipulateEvent e) {
@@ -52,23 +73,21 @@ public class StargateListener implements Listener {
         List<String> itemLore = itemMeta.getLore();
         if (Objects.isNull(itemLore)) return;
 
-        String line = itemLore.get(1);
+        String line = itemLore.get(2);
 
         if (title.startsWith("Stargate: ")) {
 
             try {
                 String sourceAddress = title.replace("Stargate: ", "");
-                e.getWhoClicked().sendMessage(sourceAddress);
                 Stargate sourceStructure = Stargate.fromAddress(sourceAddress);
 
                 String targetAddress = line.replace(ChatColor.GRAY + "Address: ", "");
-                e.getWhoClicked().sendMessage(targetAddress.strip());
                 Stargate targetStructure = Stargate.fromAddress(targetAddress);
 
-
-                Main.spacetime.establishWormhole(sourceStructure, targetStructure);
+                Wormhole wormhole = new Wormhole(sourceStructure, targetStructure);
+                Orchestrator.add(wormhole);
             } catch (Exception exp) {
-                System.out.println(exp.getMessage());
+                Messages.sendError((Player) e.getWhoClicked(), exp.getMessage());
             }
             e.setCancelled(true);
 
@@ -77,9 +96,9 @@ public class StargateListener implements Listener {
     }
 
     private int sortByDistance(Stargate a, Stargate b, Stargate c) {
-        Location locA = a.getStructure().getLocation();
-        Location locB = b.getStructure().getLocation();
-        Location locC = c.getStructure().getLocation();
+        Vector locA = a.getStructure().getLocation().toVector();
+        Vector locB = b.getStructure().getLocation().toVector();
+        Vector locC = c.getStructure().getLocation().toVector();
         return (int) (locA.distance(locC) - locB.distance(locC));
     }
 
@@ -94,7 +113,7 @@ public class StargateListener implements Listener {
             try {
                 Dialer dialer = Dialer.fromUUID(uuid);
 
-                if(Objects.isNull(dialer)) throw new Exception("Dialer does not exist.");
+                if (Objects.isNull(dialer)) throw new Exception("Dialer does not exist.");
                 Stargate stargate = dialer.getStargate();
 
                 InventoryManager inventoryManager = new InventoryManager("Stargate: " + stargate.getAddress());
@@ -107,9 +126,34 @@ public class StargateListener implements Listener {
                 stargateList.sort((a, b) -> sortByDistance(a, b, stargate));
 
                 stargateList.forEach(stargateRef -> {
-                    String distance = String.format("&7Distance: %.0f blocks", stargateRef.getStructure().getLocation().distance(stargate.getStructure().getLocation()));
+                    World worldRef = stargateRef.getLocation().getWorld();
+                    World userWorld = entity.getWorld();
                     String address = String.format("&7Address: %s", stargateRef.getAddress());
-                    inventoryManager.addItem("&f" + stargateRef.getName(), Material.DEEPSLATE_TILES, distance, address);
+                    double absoluteDistance = stargateRef.getStructure().getLocation().toVector().distance(stargate.getStructure().getLocation().toVector());
+                    String distance = String.format("&7Distance: %.0f blocks", absoluteDistance);
+                    String world;
+                    Material icon = Material.GRASS_BLOCK;
+                    assert worldRef != null;
+                    boolean alternateDimension = worldRef.getEnvironment() != userWorld.getEnvironment();
+                    String requirement = alternateDimension?"&cMK.2 Ring Required":"";
+                    switch (Objects.requireNonNull(worldRef).getEnvironment()) {
+                        case NORMAL:
+                            icon = Material.GRASS_BLOCK;
+                            world = String.format("&7World: &a%s", "Overworld");
+                            break;
+                        case NETHER:
+                            icon = Material.NETHERRACK;
+                            world = String.format("&7World: &c%s", "Nether");
+                            break;
+                        case THE_END:
+                            icon = Material.END_STONE;
+                            world = String.format("&7World: &d%s", "End");
+                            break;
+                        default:
+                            distance = "&7Distance: ∞ blocks";
+                            world = "&7World: Unknown";
+                    }
+                    inventoryManager.addItem("&f" + stargateRef.getName(), icon, alternateDimension, distance, world, address, requirement);
                 });
 
                 inventoryManager.openInventory(e.getPlayer());

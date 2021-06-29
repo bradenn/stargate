@@ -9,6 +9,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.EulerAngle;
 
 import java.util.Objects;
@@ -52,13 +53,15 @@ public class BlockStand {
         EntityEquipment entityEquipment = armorStand.getEquipment();
         if (Objects.isNull(entityEquipment)) return;
 
+        ItemStack itemStack = new ItemStack(material);
+        ItemMeta itemMeta = itemStack.getItemMeta();
 
-        entityEquipment.setItemInMainHand(new ItemStack(material));
-        armorStand.setRightArmPose(angle);
+        entityEquipment.setHelmet(itemStack);
+        armorStand.setHeadPose(angle);
         armorStand.setRotation(yaw, pitch);
 
         armorStand.setCustomName(uuid.toString());
-        armorStand.setVisible(false);
+        armorStand.setVisible(true);
         armorStand.setGravity(false);
         armorStand.setBasePlate(false);
         armorStand.setCollidable(false);
@@ -94,7 +97,7 @@ public class BlockStand {
     public static boolean isArmorStand(Entity entity, UUID uuid) {
         if (entity instanceof ArmorStand) {
             ArmorStand armorStand = (ArmorStand) entity;
-            if (!armorStand.isVisible() && !Objects.isNull(armorStand.getCustomName())) {
+            if (!Objects.isNull(armorStand.getCustomName())) {
                 return armorStand.getCustomName().equalsIgnoreCase(uuid.toString());
             }
         }

@@ -1,6 +1,7 @@
 package com.bradenn.stargates;
 
 import com.bradenn.stargates.commands.StargateCommand;
+import com.bradenn.stargates.runtime.Orchestrator;
 import com.bradenn.stargates.structures.Dialer;
 import com.bradenn.stargates.structures.Stargate;
 import org.bukkit.command.PluginCommand;
@@ -11,6 +12,11 @@ public class Main extends JavaPlugin {
 
     public static Plugin plugin;
     public static Spacetime spacetime;
+    public static Orchestrator orchestrator;
+
+    public static String getPluginName() {
+        return plugin.getDescription().getName();
+    }
 
     @Override
     public void onEnable() {
@@ -30,8 +36,10 @@ public class Main extends JavaPlugin {
         PluginCommand stargateCommand = getCommand("stargate");
         new StargateCommand().init(stargateCommand);
 
-        spacetime = new Spacetime(plugin);
+        spacetime = new Spacetime();
         spacetime.run();
+
+        orchestrator = new Orchestrator();
 
         Database.connect();
 

@@ -7,20 +7,20 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Spacetime {
 
     private final Map<Stargate, Stargate> wormholes;
-    private final Plugin plugin;
 
-    public Spacetime(Plugin plugin) {
+    public Spacetime() {
         wormholes = new HashMap<>();
-        this.plugin = plugin;
+
     }
 
     public void run() {
@@ -30,30 +30,19 @@ public class Spacetime {
             public void run() {
                 wormholes.forEach(spacetime::updateWormhole);
             }
-        }.runTaskTimer(plugin, 0, 3);
+        }.runTaskTimer(Main.plugin, 0, 3);
     }
 
     public void updateWormhole(Stargate outgoing, Stargate target) {
-
-        try {
-            outgoing.drawIdle();
-            target.drawIdle();
-        } catch (Exception exception) {
-            System.out.println(exception.getMessage());
-        }
-
+        outgoing.renderPortal();
+        target.renderPortal();
     }
 
     public void intersectsPortal(Player player) {
         wormholes.forEach((from, to) -> {
-            try {
-                if (from.getBoundingBox().overlaps(player.getBoundingBox())) {
-                    to.teleportPlayer(player);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (from.getBoundingBox().overlaps(player.getBoundingBox())) {
+                to.summonPlayer(player);
             }
-
         });
     }
 
@@ -67,7 +56,6 @@ public class Spacetime {
         } else if (isBusy(target)) {
             throw new Exception("Target Stargate is busy.");
         }
-
         wormholes.put(outgoing, target);
 
         BossBar bossBar = Bukkit.getServer().createBossBar(String.format("Stargate: %s → %s", outgoing.getName(), target.getName()), BarColor.WHITE, BarStyle.SEGMENTED_12);
@@ -83,15 +71,17 @@ public class Spacetime {
 
             @Override
             public void run() {
-                countdown-=1;
-                bossBar.setProgress(countdown/12);
+                countdown -= 0.20;
+                bossBar.setProgress(countdown / 12);
+                outgoing.renderPortal();
+                target.renderPortal();
                 if (countdown <= 0) {
                     wormholes.remove(outgoing, target);
                     bossBar.removeAll();
                     cancel();
                 }
             }
-        }.runTaskTimer(Main.plugin, 20, 20);
+        }.runTaskTimer(Main.plugin, 20, 4);
 
     }
 
