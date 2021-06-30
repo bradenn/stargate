@@ -96,9 +96,10 @@ public class ParticleEffects {
         RED(255, 69, 58),
         BLUE(10, 132, 255),
         LIGHT_BLUE(94, 92, 230),
-        GREY(142, 142, 147),
+        GREY(200, 200, 200),
         INDIGO(94, 92, 230),
         PURPLE(191, 90, 242),
+        AQUA(63, 124, 100),
         DARK_GREY(44, 44, 46);
 
         Color color;

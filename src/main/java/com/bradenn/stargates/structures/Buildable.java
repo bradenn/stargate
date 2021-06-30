@@ -2,7 +2,10 @@ package com.bradenn.stargates.structures;
 
 public interface Buildable {
 
-    void rebuild();
+    default void rebuild() {
+        destroy();
+        build();
+    }
 
     void build();
 

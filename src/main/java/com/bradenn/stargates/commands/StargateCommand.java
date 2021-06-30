@@ -35,6 +35,7 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         registerSubCommand(new RemoveCommand());
         registerSubCommand(new PurgeCommand());
         registerSubCommand(new RebuildCommand());
+        registerSubCommand(new TestCommand());
     }
 
     @Override

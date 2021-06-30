@@ -1,7 +1,7 @@
 package com.bradenn.stargates.structures;
 
-import com.bradenn.stargates.BlockStand;
 import com.bradenn.stargates.Database;
+import com.bradenn.stargates.cosmetics.BlockStand;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.bukkit.Location;
@@ -16,13 +16,12 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Dialer implements Buildable {
+public class Dialer extends Structure {
 
     private final StargateModel model;
     private final String name;
     private final UUID uuid;
     private final UUID stargateUUID;
-    private final Structure structure;
 
     /**
      * Create a new dialer.
@@ -32,15 +31,21 @@ public class Dialer implements Buildable {
      * @param orientation  The N W S E orientation of the dialer.
      */
     public Dialer(String name, StargateModel model, UUID stargateUUID, Location baseLocation, Orientation orientation) {
+        super(baseLocation.getBlock().getLocation().clone().add(orientation.translate(3, -0.5, 2)).add(0.5, 0, 0.5), generateBoundingBox(baseLocation, orientation), orientation);
         this.name = name;
         this.model = model;
-        Vector translate = orientation.translate(3, 0, 2);
-        Location adjusted = baseLocation.getBlock().getLocation().add(translate.getX() + 0.5, -0.5, translate.getZ() + 0.5);
-        this.structure = generateStructure(adjusted, orientation);
         this.uuid = UUID.randomUUID();
         this.stargateUUID = stargateUUID;
         build();
         Database.getCollection("dialers").insertOne(getDocument());
+    }
+
+    private static BoundingBox generateBoundingBox(Location base, Orientation orientation) {
+        Location center = base.getBlock().getLocation().clone();
+        Vector translated = orientation.translate(3, -0.5, 2);
+        center.add(translated);
+        Vector adjusted = orientation.translate(2, 2, 2);
+        return BoundingBox.of(center, adjusted.getX(), adjusted.getY(), adjusted.getZ());
     }
 
     /**
@@ -50,11 +55,11 @@ public class Dialer implements Buildable {
      */
     @SuppressWarnings("unchecked")
     public Dialer(Document document) {
+        super((Document) document.get("structure"));
         this.name = document.getString("name");
         this.model = StargateModel.deserialize((Map<String, Object>) document.get("model"));
         this.uuid = UUID.fromString(document.getString("uuid"));
         this.stargateUUID = UUID.fromString(document.getString("stargateUUID"));
-        this.structure = new Structure((Document) document.get("structure"));
     }
 
     /**
@@ -84,20 +89,18 @@ public class Dialer implements Buildable {
     }
 
     /**
-     * @param baseLocation The base location of the structure.
-     * @param orientation  The orientation of the dialer.
-     * @return A dialer structure reference.
+     * Get a dialer object from its UUID.
      */
-    private Structure generateStructure(Location baseLocation, Orientation orientation) {
-        Block center = baseLocation.getBlock();
-
-        BoundingBox bounds = center.getBoundingBox().expand(1, 1, 1);
-
-        return new Structure(baseLocation, bounds, orientation);
+    public static Dialer fromStargate(UUID uuid) {
+        MongoCollection<Document> dialers = Database.getCollection("dialers");
+        Document match = dialers.find(new Document("stargateUUID", uuid.toString())).first();
+        if (Objects.isNull(match)) return null;
+        return new Dialer(match);
     }
 
     /**
      * Get a bson document of this serialized class.
+     *
      * @return MongoDB bson document.
      */
     public Document getDocument() {
@@ -106,12 +109,13 @@ public class Dialer implements Buildable {
         document.put("model", model.serialize());
         document.put("uuid", uuid.toString());
         document.put("stargateUUID", stargateUUID.toString());
-        document.put("structure", structure.getDocument());
+        document.put("structure", super.getDocument());
         return document;
     }
 
     /**
      * Get the stargate object assigned to this dialer.
+     *
      * @return Stargate object reference
      */
     public Stargate getStargate() {
@@ -119,11 +123,14 @@ public class Dialer implements Buildable {
     }
 
     /**
-     * Find, destroy, and rebuild the current dialers.
+     * Build the correct dialer.
      */
-    public void rebuild() {
-        destroy();
-        build();
+    public void build() {
+        if (model.isMk2()) {
+            buildMk2();
+        } else {
+            buildMk1();
+        }
     }
 
     /**
@@ -131,8 +138,8 @@ public class Dialer implements Buildable {
      */
     public void buildMk1() {
         double yOffset = 0;
-        World world = structure.getWorld();
-        Location centerLocation = structure.getLocation().clone().add(0, yOffset, 0);
+        World world = getWorld();
+        Location centerLocation = getLocation().clone().add(0, yOffset, 0);
 
         double outer = 8;
         BlockStand baseRing = new BlockStand(uuid, world);
@@ -171,12 +178,11 @@ public class Dialer implements Buildable {
      */
     public void buildMk2() {
         double yOffset = 0;
-        World world = structure.getWorld();
-        Location centerLocation = structure.getLocation().clone().add(0, yOffset, 0);
+        World world = getWorld();
+        Location centerLocation = getLocation().clone().add(0, yOffset, 0);
 
         double outer = 8;
         BlockStand baseRing = new BlockStand(uuid, world);
-
 
 
         for (int i = 0; i < outer; i++) {
@@ -205,25 +211,14 @@ public class Dialer implements Buildable {
         baseRing.largeBlockAt(centerLocation.clone().add(0, -1 + 0.125, 0), new EulerAngle(0, 0, 0));
 
         baseRing.setMaterial(Material.DARK_PRISMARINE_SLAB);
-        baseRing.largeBlockAt(centerLocation.clone().add(0.125/2, 0.25 - 0.13, -0.125/2), new EulerAngle(Math.PI/2, 0, Math.PI/4));
-    }
-
-    /**
-     * Build the correct dialer.
-     */
-    public void build() {
-        if (model.isMk2()) {
-            buildMk2();
-        } else {
-            buildMk1();
-        }
+        baseRing.largeBlockAt(centerLocation.clone().add(0.125 / 2, 0.25 - 0.13, -0.125 / 2), new EulerAngle(Math.PI / 2, 0, Math.PI / 4));
     }
 
     /**
      * Destroy the correct dialer.
      */
     public void destroy() {
-        Collection<Entity> nearbyEntities = structure.getWorld().getNearbyEntities(structure.getBoundingBox().clone().expand(3, 3, 3), e -> BlockStand.isArmorStand(e, uuid));
+        Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(getBoundingBox().clone().expand(3, 3, 3), e -> BlockStand.isArmorStand(e, uuid));
         nearbyEntities.forEach(Entity::remove);
     }
 }

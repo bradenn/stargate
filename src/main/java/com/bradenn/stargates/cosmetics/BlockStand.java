@@ -1,4 +1,4 @@
-package com.bradenn.stargates;
+package com.bradenn.stargates.cosmetics;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

@@ -1,28 +1,27 @@
 package com.bradenn.stargates;
 
-import com.google.common.collect.Multimap;
-import org.apache.commons.lang.RandomStringUtils;
+import com.bradenn.stargates.structures.DialerInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class InventoryManager {
 
-    private Inventory inventory;
+    private final Inventory inventory;
 
-    public InventoryManager(String name) {
+    public InventoryManager(UUID stargateUUID, String name) {
+//        DialerInventory dialerInventory = new DialerInventory(stargateUUID);
         this.inventory = Bukkit.createInventory(null, InventoryType.PLAYER, name);
 
     }
@@ -35,7 +34,7 @@ public class InventoryManager {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
         assert itemMeta != null;
-        if(enchanted) itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+        if (enchanted) itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
         itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         List<String> lore = new ArrayList<>();
         for (String arg : args) {
