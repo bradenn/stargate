@@ -11,7 +11,7 @@ import org.bukkit.util.Vector;
 
 import java.util.Map;
 
-public abstract class Structure implements Buildable {
+public abstract class Structure implements Buildable, Persistent {
 
     private final World world;
     private final Location location;

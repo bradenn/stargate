@@ -1,5 +1,6 @@
-package com.bradenn.stargates;
+package com.bradenn.stargates.cosmetics;
 
+import com.bradenn.stargates.Main;
 import org.bukkit.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;

@@ -11,7 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin {
 
     public static Plugin plugin;
-    public static Spacetime spacetime;
     public static Orchestrator orchestrator;
 
     public static String getPluginName() {
@@ -35,9 +34,6 @@ public class Main extends JavaPlugin {
 
         PluginCommand stargateCommand = getCommand("stargate");
         new StargateCommand().init(stargateCommand);
-
-        spacetime = new Spacetime();
-        spacetime.run();
 
         orchestrator = new Orchestrator();
 

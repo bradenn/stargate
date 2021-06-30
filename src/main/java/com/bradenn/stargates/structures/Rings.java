@@ -21,26 +21,21 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Stargate extends Structure {
+public class Rings extends Structure {
 
     /* Private variables */
 
-    private final StargateModel model;
     private final UUID uuid;
     private final String name;
-    private final String address;
 
     /**
-     * Load stargate from database document.
+     * Load rings from database document.
      *
      * @param document The mongodb BSON document.
      */
-    @SuppressWarnings("unchecked")
-    public Stargate(Document document) {
+    public Rings(Document document) {
         super((Document) document.get("structure"));
         this.name = document.getString("name");
-        this.model = StargateModel.deserialize((Map<String, Object>) document.get("model"));
-        this.address = document.getString("address");
         this.uuid = UUID.fromString(document.getString("uuid"));
     }
 
@@ -53,12 +48,10 @@ public class Stargate extends Structure {
      * @param base        The y + 1 location of the stargate.
      * @param orientation The N W S E orientation of the stargate.
      */
-    public Stargate(String name, Location base, BoundingBox bounds, Orientation orientation) {
+    public Rings(String name, Location base, BoundingBox bounds, Orientation orientation) {
         super(base, bounds, orientation);
 
         this.name = name;
-        this.model = StargateModel.MK1;
-        this.address = RandomStringUtils.randomAlphanumeric(4).toUpperCase();
         this.uuid = UUID.randomUUID();
 
         build();
@@ -71,32 +64,19 @@ public class Stargate extends Structure {
      * @param uuid Stargate uuid
      * @return Stargate object
      */
-    public static Stargate fromUUID(UUID uuid) {
-        MongoCollection<Document> stargates = Database.getCollection("stargates");
+    public static Rings fromUUID(UUID uuid) {
+        MongoCollection<Document> stargates = Database.getCollection(getIdentifier());
         Document match = stargates.find(new Document("uuid", uuid.toString())).first();
         if (Objects.isNull(match)) return null;
-        return new Stargate(match);
-    }
-
-    /**
-     * Construct a Stargate from its database record.
-     *
-     * @param address Stargate address
-     * @return Stargate object
-     */
-    public static Stargate fromAddress(String address) {
-        MongoCollection<Document> stargates = Database.getCollection("stargates");
-        Document match = stargates.find(new Document("address", address)).first();
-        if (Objects.isNull(match)) return null;
-        return new Stargate(match);
+        return new Rings(match);
     }
 
     /**
      * Get all stargate objects.
      */
-    public static List<Stargate> getAll() {
-        List<Stargate> stargates = new ArrayList<>();
-        Database.getCollection("stargates").find().map(Stargate::new).forEach((Consumer<? super Stargate>) stargates::add);
+    public static List<Rings> getAll() {
+        List<Rings> stargates = new ArrayList<>();
+        Database.getCollection(getIdentifier()).find().map(Rings::new).forEach((Consumer<? super Rings>) stargates::add);
         return stargates;
     }
 
@@ -106,24 +86,17 @@ public class Stargate extends Structure {
      * Rebuild all of the stargates.
      */
     public static void rebuildAll() {
-        Database.getCollection("stargates").find().forEach((Consumer<? super Document>) stargate -> new Stargate(stargate).rebuild());
+        Database.getCollection(getIdentifier()).find().forEach((Consumer<? super Document>) stargate -> new Rings(stargate).rebuild());
     }
 
     /**
      * Destroy all of the stargate structures and remove them from the database.
      */
     public static void terminateAll() {
-        Database.getCollection("stargates").find().forEach((Consumer<? super Document>) stargate -> {
-            Stargate stargateRef = new Stargate(stargate);
+        Database.getCollection(getIdentifier()).find().forEach((Consumer<? super Document>) stargate -> {
+            Rings stargateRef = new Rings(stargate);
             stargateRef.terminate();
         });
-    }
-
-    private void insert() {
-        MongoCollection<Document> collection = Database.getCollection("stargates");
-        if (collection.find(Filters.eq("uuid", getUUID().toString())).first() == null) {
-            collection.insertOne(getDocument());
-        }
     }
 
     /**
@@ -132,15 +105,13 @@ public class Stargate extends Structure {
     public Document getDocument() {
         Document document = new Document();
         document.put("name", name);
-        document.put("model", model.serialize());
-        document.put("address", address);
         document.put("uuid", uuid.toString());
         document.put("structure", super.getDocument());
         return document;
     }
 
-    public String getIdentifier() {
-        return "stargates";
+    public static String getIdentifier() {
+        return "rings";
     }
 
     /* Macro Getter functions */
@@ -153,30 +124,6 @@ public class Stargate extends Structure {
         return name;
     }
 
-    /* Static Class Constructors */
-
-    public String getAddress() {
-        return address;
-    }
-
-    public StargateModel getModel() {
-        return model;
-    }
-
-    /* Bulk Static Class Constructors */
-
-    public void setModel(StargateModel stargateModel) {
-
-        Database.getCollection("stargates").findOneAndUpdate(new Document("uuid", this.getUUID().toString()), Updates.set("model", stargateModel.serialize()));
-        Database.getCollection("dialers").findOneAndUpdate(new Document("stargateUUID", this.getUUID().toString()), Updates.set("model", stargateModel.serialize()));
-
-        Dialer dialer = Dialer.fromStargate(getUUID());
-        assert dialer != null;
-        dialer.rebuild();
-        Stargate stargate = Stargate.fromUUID(getUUID());
-        assert stargate != null;
-        stargate.rebuild();
-    }
 
     /* Local functions */
 
@@ -280,30 +227,6 @@ public class Stargate extends Structure {
             Vector innerRotation = getOrientation().rotate(0, 0, -innerAngle);
             innerRing.largeBlockAt(innerLocation, new EulerAngle(innerRotation.getX(), innerRotation.getY(), innerRotation.getZ()));
 
-            int chevronCount = 8;
-            if (getModel().equals(StargateModel.MK2)) {
-                chevronCount = 16;
-            }
-            if (i > chevronCount * 2) continue;
-            double chevronDelta = unitCircle / chevronCount;
-
-            double chevronAngle = chevronDelta * i + chevronDelta * (getModel().equals(StargateModel.MK2) ? 4 : 2);
-
-            double chevronX = Math.cos(chevronDelta * i) * 3.125;
-            double chevronY = Math.sin(chevronDelta * i) * 3.125;
-
-            BlockStand chevronRing = new BlockStand(uuid, world);
-            Location chevronLocationA = centerLocation.clone().add(getOrientation().rotate(chevronX, chevronY, (i % 2 == 0 ? 0.025 : -0.025)));
-            Location chevronLocationB = centerLocation.clone().add(getOrientation().rotate(chevronX, chevronY, (i % 2 == 0 ? -0.025 : 0.025)));
-            if (getModel().equals(StargateModel.MK1)) {
-                chevronRing.setMaterial(Material.WAXED_CUT_COPPER_SLAB);
-            } else {
-                chevronRing.setMaterial(Material.DARK_PRISMARINE_SLAB);
-            }
-
-            Vector chevronRotation = getOrientation().rotateSpin(0, 0, -chevronAngle);
-            chevronRing.largeBlockAt(chevronLocationA, new EulerAngle(chevronRotation.getX(), chevronRotation.getY(), chevronRotation.getZ()));
-            chevronRing.largeBlockAt(chevronLocationB, new EulerAngle(chevronRotation.getX(), chevronRotation.getY(), chevronRotation.getZ()));
         }
     }
 

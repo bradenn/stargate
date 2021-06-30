@@ -2,19 +2,18 @@ package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.structures.Dialer;
-import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Stargate;
 import com.bradenn.stargates.structures.StructureFactory;
 import org.bukkit.entity.Player;
 
-public class CreateCommand implements SubCommand {
+public class RingsCommand implements SubCommand {
 
     public String getLabel() {
-        return "create";
+        return "rings";
     }
 
     public String getDescription() {
-        return "Build and register a stargate.";
+        return "Build a ring teleporter.";
     }
 
     public void run(Player player, String[] args) throws Exception {

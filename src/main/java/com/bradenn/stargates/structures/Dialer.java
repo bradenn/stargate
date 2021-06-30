@@ -3,11 +3,11 @@ package com.bradenn.stargates.structures;
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.EulerAngle;
@@ -21,31 +21,23 @@ public class Dialer extends Structure {
     private final StargateModel model;
     private final String name;
     private final UUID uuid;
-    private final UUID stargateUUID;
+    private UUID stargateUUID;
 
     /**
      * Create a new dialer.
      *
-     * @param name         Name of the dialer.
-     * @param baseLocation The y + 1 location of the dialer.
-     * @param orientation  The N W S E orientation of the dialer.
+     * @param base        The y + 1 location of the dialer.
+     * @param name        Name of the dialer.
+     * @param orientation The N W S E orientation of the dialer.
      */
-    public Dialer(String name, StargateModel model, UUID stargateUUID, Location baseLocation, Orientation orientation) {
-        super(baseLocation.getBlock().getLocation().clone().add(orientation.translate(3, -0.5, 2)).add(0.5, 0, 0.5), generateBoundingBox(baseLocation, orientation), orientation);
+    public Dialer(String name, Location base, BoundingBox bounds, Orientation orientation) {
+        super(base, bounds, orientation);
         this.name = name;
-        this.model = model;
+        this.model = StargateModel.MK1;
         this.uuid = UUID.randomUUID();
-        this.stargateUUID = stargateUUID;
+        this.stargateUUID = UUID.randomUUID();
         build();
-        Database.getCollection("dialers").insertOne(getDocument());
-    }
-
-    private static BoundingBox generateBoundingBox(Location base, Orientation orientation) {
-        Location center = base.getBlock().getLocation().clone();
-        Vector translated = orientation.translate(3, -0.5, 2);
-        center.add(translated);
-        Vector adjusted = orientation.translate(2, 2, 2);
-        return BoundingBox.of(center, adjusted.getX(), adjusted.getY(), adjusted.getZ());
+        save();
     }
 
     /**
@@ -98,6 +90,14 @@ public class Dialer extends Structure {
         return new Dialer(match);
     }
 
+    public String getIdentifier() {
+        return "dialers";
+    }
+
+    public UUID getUUID() {
+        return uuid;
+    }
+
     /**
      * Get a bson document of this serialized class.
      *
@@ -120,6 +120,13 @@ public class Dialer extends Structure {
      */
     public Stargate getStargate() {
         return Stargate.fromUUID(this.stargateUUID);
+    }
+
+    /**
+     * Set the stargate.
+     */
+    public void assignStargate(UUID uuid) {
+        stargateUUID = uuid;
     }
 
     /**
