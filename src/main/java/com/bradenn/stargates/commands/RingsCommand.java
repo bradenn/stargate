@@ -1,8 +1,7 @@
 package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
-import com.bradenn.stargates.structures.Dialer;
-import com.bradenn.stargates.structures.Stargate;
+import com.bradenn.stargates.structures.Rings;
 import com.bradenn.stargates.structures.StructureFactory;
 import org.bukkit.entity.Player;
 
@@ -20,15 +19,11 @@ public class RingsCommand implements SubCommand {
         if (args.length >= 2) {
             String name = args[1];
 
-            Stargate stargate = (Stargate) StructureFactory.createStructure(StructureFactory.StructureType.STARGATE, name, player.getLocation());
-            stargate.save();
+            Rings rings = (Rings) StructureFactory.createStructure(StructureFactory.StructureType.RINGS, name, player.getLocation());
+            rings.save();
 
-            Dialer dialer = (Dialer) StructureFactory.createStructure(StructureFactory.StructureType.DIALER, name, player.getLocation());
-            dialer.assignStargate(stargate.getUUID());
-            dialer.save();
-
-            Messages.sendInfo(player, "A stargate named '%s' has been created.", stargate.getName());
-        }else{
+            Messages.sendInfo(player, "A new ring teleporter named '%s' has been created.", rings.getName());
+        } else {
             throw new Exception("Insufficient arguments.");
         }
     }

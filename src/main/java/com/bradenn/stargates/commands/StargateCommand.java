@@ -24,7 +24,7 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         return commands.getOrDefault(commandLabel, helpCommand);
     }
 
-    public void init(PluginCommand pluginCommand) {
+    public StargateCommand(PluginCommand pluginCommand) {
         if (pluginCommand != null) {
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
@@ -35,6 +35,7 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         registerSubCommand(new RemoveCommand());
         registerSubCommand(new PurgeCommand());
         registerSubCommand(new RebuildCommand());
+        registerSubCommand(new RingsCommand());
         registerSubCommand(new TestCommand());
     }
 

@@ -4,7 +4,6 @@ import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bson.Document;
@@ -117,13 +116,6 @@ public class Stargate extends Structure {
             Stargate stargateRef = new Stargate(stargate);
             stargateRef.terminate();
         });
-    }
-
-    private void insert() {
-        MongoCollection<Document> collection = Database.getCollection("stargates");
-        if (collection.find(Filters.eq("uuid", getUUID().toString())).first() == null) {
-            collection.insertOne(getDocument());
-        }
     }
 
     /**

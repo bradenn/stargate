@@ -3,7 +3,6 @@ package com.bradenn.stargates.structures;
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,7 +10,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.EulerAngle;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 import java.util.function.Consumer;

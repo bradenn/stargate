@@ -22,7 +22,7 @@ public class Orchestrator {
     public static void add(Ephemeral ephemeralObject) throws Exception {
         List<UUID> uuids = new ArrayList<>(List.copyOf(ephemeralObject.getUUIDS()));
         if (uuids.removeAll(occupiedUUIDS)) {
-                throw new Exception("Wormhole is busy.");
+            throw new Exception("Wormhole is busy.");
         }
         occupiedUUIDS.addAll(ephemeralObject.getUUIDS());
         ephemeralList.add(ephemeralObject);

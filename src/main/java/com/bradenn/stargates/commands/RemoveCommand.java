@@ -22,7 +22,7 @@ public class RemoveCommand implements SubCommand {
 
     public void run(Player player, String[] args) throws Exception {
         Stargate stargate = Stargate.fromAddress(args[1]);
-        if(Objects.isNull(stargate)) throw new Exception("Invalid stargate address.");
+        if (Objects.isNull(stargate)) throw new Exception("Invalid stargate address.");
         stargate.terminate();
         Messages.sendInfo(player, "The stargate '%s' has been permanently removed.", stargate.getName());
     }

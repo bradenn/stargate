@@ -3,6 +3,7 @@ package com.bradenn.stargates;
 import com.bradenn.stargates.commands.StargateCommand;
 import com.bradenn.stargates.runtime.Orchestrator;
 import com.bradenn.stargates.structures.Dialer;
+import com.bradenn.stargates.structures.Rings;
 import com.bradenn.stargates.structures.Stargate;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
@@ -17,13 +18,8 @@ public class Main extends JavaPlugin {
         return plugin.getDescription().getName();
     }
 
-    @Override
     public void onEnable() {
         init();
-    }
-
-    @Override
-    public void onDisable() {
     }
 
     private void init() {
@@ -33,7 +29,7 @@ public class Main extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new StargateListener(), this);
 
         PluginCommand stargateCommand = getCommand("stargate");
-        new StargateCommand().init(stargateCommand);
+        new StargateCommand(stargateCommand);
 
         orchestrator = new Orchestrator();
 
@@ -41,6 +37,7 @@ public class Main extends JavaPlugin {
 
         Stargate.rebuildAll();
         Dialer.rebuildAll();
+        Rings.rebuildAll();
 
     }
 }

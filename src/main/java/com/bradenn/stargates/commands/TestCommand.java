@@ -1,9 +1,6 @@
 package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.BlockStand;
-import com.bradenn.stargates.cosmetics.Messages;
-import com.bradenn.stargates.structures.Orientation;
-import com.bradenn.stargates.structures.Stargate;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.util.EulerAngle;

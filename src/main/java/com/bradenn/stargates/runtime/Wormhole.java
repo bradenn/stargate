@@ -1,24 +1,16 @@
 package com.bradenn.stargates.runtime;
 
-import com.bradenn.stargates.Main;
 import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.cosmetics.ProgressBar;
 import com.bradenn.stargates.structures.Stargate;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.BoundingBox;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class Wormhole implements Ephemeral {
 
@@ -36,7 +28,7 @@ public class Wormhole implements Ephemeral {
 
     private void addNearbyPlayers(Location location) {
         World world = location.getWorld();
-        if(world == null) return;
+        if (world == null) return;
 
         world.getNearbyEntities(location, 16, 16, 16, this::isPlayer)
                 .forEach(this::enrollPlayer);
@@ -51,7 +43,7 @@ public class Wormhole implements Ephemeral {
     }
 
     public void eventHorizonPredicate(Player player) {
-        if(player.getBoundingBox().overlaps(source.getBoundingBox())){
+        if (player.getBoundingBox().overlaps(source.getBoundingBox())) {
             target.summonPlayer(player);
         }
     }

@@ -2,15 +2,14 @@ package com.bradenn.stargates.cosmetics;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Vector;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -44,7 +43,23 @@ public class BlockStand {
 
     public void smallBlockAt(Location location, EulerAngle angle) {
         this.angle = angle;
-        world.spawn(location, ArmorStand.class, this::configureSmallArmorStand);
+        double xRad = (Math.PI * angle.getX()) / 180;
+        double zRad = (Math.PI * angle.getZ()) / 180;
+        double x = (Math.sin(zRad) * Math.cos(xRad)) * -0.25;
+        double y = (Math.cos(xRad) * Math.cos(zRad)) * -0.25;
+        double z = Math.sin(xRad) * -0.25;
+        world.spawn(location.clone().add(x, y - 1.4375, z), ArmorStand.class, this::configureSmallArmorStand);
+    }
+
+    public void createRing(Location center, double count, Vector size, boolean offset) {
+        double unit = (Math.PI * 2) / count;
+        double off = offset ? unit / 2 : 0;
+        for (double i = 0; i < count; i++) {
+            double dx = Math.cos(unit * i + off) * size.getX();
+            double dy = Math.sin(unit * i + off) * size.getY();
+
+            smallBlockAt(center.clone().add(dx, i * 4E-4 - (offset ? 0.02 : 0), dy), new EulerAngle(0, unit * i + off, 0));
+        }
     }
 
     private void configureSmallArmorStand(Entity entity) {
@@ -54,14 +69,13 @@ public class BlockStand {
         if (Objects.isNull(entityEquipment)) return;
 
         ItemStack itemStack = new ItemStack(material);
-        ItemMeta itemMeta = itemStack.getItemMeta();
 
         entityEquipment.setHelmet(itemStack);
         armorStand.setHeadPose(angle);
         armorStand.setRotation(yaw, pitch);
 
         armorStand.setCustomName(uuid.toString());
-        armorStand.setVisible(true);
+        armorStand.setVisible(false);
         armorStand.setGravity(false);
         armorStand.setBasePlate(false);
         armorStand.setCollidable(false);
@@ -83,6 +97,8 @@ public class BlockStand {
         armorStand.setRotation(yaw, pitch);
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
         armorStand.setCustomName(uuid.toString());
+        armorStand.setMarker(false);
+
         armorStand.setVisible(false);
         armorStand.setGravity(false);
         armorStand.setBasePlate(false);

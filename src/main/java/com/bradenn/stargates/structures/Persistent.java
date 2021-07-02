@@ -11,7 +11,7 @@ public interface Persistent {
 
     Document getDocument();
 
-    static String getIdentifier() {
+    default String getIdentifier() {
         return "unknown";
     }
 
