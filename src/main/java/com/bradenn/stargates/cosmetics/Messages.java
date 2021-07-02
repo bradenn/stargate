@@ -24,7 +24,7 @@ public class Messages {
     private static String format(boolean error, String message, Object... args) {
         String formatted = String.format(message, args);
         String colored = ChatColor.translateAlternateColorCodes('&', formatted);
-        return String.format("%s %s%s", prefix, error?danger:mono3, colored);
+        return String.format("%s %s%s", prefix, error ? danger : mono3, colored);
     }
 
     public static void sendInfo(Player player, String message, Object... args) {

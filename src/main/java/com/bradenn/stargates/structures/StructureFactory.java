@@ -16,6 +16,8 @@ public class StructureFactory {
                 return new Stargate(name, baseOffset, bounds, orientation);
             case DIALER:
                 return new Dialer(name, baseOffset, bounds, orientation);
+            case RINGS:
+                return new Rings(name, baseOffset, bounds, orientation);
             default:
                 throw new Exception(String.format("Invalid structure type '%s'.", type));
         }

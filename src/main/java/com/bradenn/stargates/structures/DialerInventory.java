@@ -60,7 +60,7 @@ public class DialerInventory implements InventoryHolder {
         String world = "&7World: ";
         String gateModel = "&7Model: &7" + stargate.getModel();
 
-        switch (gateWorld.getEnvironment()) {
+        switch (Objects.requireNonNull(gateWorld).getEnvironment()) {
             case NORMAL:
                 material = Material.GRASS_BLOCK;
                 world += "&aOverworld";
@@ -83,6 +83,7 @@ public class DialerInventory implements InventoryHolder {
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         String title = String.format("&f%s", stargate.getName());
+        assert itemMeta != null;
         itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', title));
 
         List<String> lore = new ArrayList<>();
@@ -91,7 +92,7 @@ public class DialerInventory implements InventoryHolder {
         lore.add(format(world));
         lore.add(format(gateModel));
         if (!this.stargate.getModel().isMk2()) {
-            if (!gateWorld.equals(this.stargate.getLocation().getWorld())){
+            if (!gateWorld.equals(this.stargate.getLocation().getWorld())) {
                 lore.add(format("&cMK2 Stargate required."));
                 itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
                 itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

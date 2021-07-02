@@ -1,8 +1,6 @@
 package com.bradenn.stargates.cosmetics;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -16,7 +14,7 @@ public class ProgressBar {
     private final float maxValue;
     private final float delta;
     private float remaining;
-    private BossBar bossBar;
+    private final BossBar bossBar;
 
     public ProgressBar(String title, List<Player> playerList, float maxValue, float delta) {
         this.bossBar = Bukkit.createBossBar(title, BarColor.BLUE, BarStyle.SEGMENTED_10);

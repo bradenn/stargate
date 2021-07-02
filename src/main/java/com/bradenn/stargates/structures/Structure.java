@@ -4,10 +4,7 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Barrel;
-import org.bukkit.block.Block;
 import org.bukkit.util.BoundingBox;
-import org.bukkit.util.Vector;
 
 import java.util.Map;
 

@@ -22,13 +22,13 @@ public class ParticleEffects {
 
         Color color = Color.fromRGB(0, 128, 255);
         Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1);
-        new BukkitRunnable(){
+        new BukkitRunnable() {
             @Override
             public void run() {
 
-                for(double x = boundingBox.getMinX(); x <= boundingBox.getMaxX(); x+=0.5){
-                    for(double y = boundingBox.getMinY(); y <= boundingBox.getMaxY(); y+=0.5){
-                        for(double z = boundingBox.getMinZ(); z <= boundingBox.getMaxZ(); z+=0.5){
+                for (double x = boundingBox.getMinX(); x <= boundingBox.getMaxX(); x += 0.5) {
+                    for (double y = boundingBox.getMinY(); y <= boundingBox.getMaxY(); y += 0.5) {
+                        for (double z = boundingBox.getMinZ(); z <= boundingBox.getMaxZ(); z += 0.5) {
                             Location l = new Location(world, x, y, z);
                             world.spawnParticle(Particle.REDSTONE, l, 1, dustOptions);
                         }
@@ -45,7 +45,7 @@ public class ParticleEffects {
 
     public static void drawAccretionDisk(Location center) {
         World world = center.getWorld();
-        if(Objects.isNull(world)) return;
+        if (Objects.isNull(world)) return;
         Random random = new Random();
 
         Particle.DustOptions blueDust = new Particle.DustOptions(ParticleColor.BLUE.getColor(), 2);

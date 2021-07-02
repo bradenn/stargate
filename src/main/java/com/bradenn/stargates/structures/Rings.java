@@ -4,9 +4,6 @@ import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
-import org.apache.commons.lang.RandomStringUtils;
 import org.bson.Document;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
@@ -15,7 +12,6 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BoundingBox;
-import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -65,7 +61,7 @@ public class Rings extends Structure {
      * @return Stargate object
      */
     public static Rings fromUUID(UUID uuid) {
-        MongoCollection<Document> stargates = Database.getCollection(getIdentifier());
+        MongoCollection<Document> stargates = Database.getCollection("rings");
         Document match = stargates.find(new Document("uuid", uuid.toString())).first();
         if (Objects.isNull(match)) return null;
         return new Rings(match);
@@ -76,7 +72,7 @@ public class Rings extends Structure {
      */
     public static List<Rings> getAll() {
         List<Rings> stargates = new ArrayList<>();
-        Database.getCollection(getIdentifier()).find().map(Rings::new).forEach((Consumer<? super Rings>) stargates::add);
+        Database.getCollection("rings").find().map(Rings::new).forEach((Consumer<? super Rings>) stargates::add);
         return stargates;
     }
 
@@ -86,17 +82,21 @@ public class Rings extends Structure {
      * Rebuild all of the stargates.
      */
     public static void rebuildAll() {
-        Database.getCollection(getIdentifier()).find().forEach((Consumer<? super Document>) stargate -> new Rings(stargate).rebuild());
+        Database.getCollection("rings").find().forEach((Consumer<? super Document>) stargate -> new Rings(stargate).rebuild());
     }
 
     /**
      * Destroy all of the stargate structures and remove them from the database.
      */
     public static void terminateAll() {
-        Database.getCollection(getIdentifier()).find().forEach((Consumer<? super Document>) stargate -> {
+        Database.getCollection("rings").find().forEach((Consumer<? super Document>) stargate -> {
             Rings stargateRef = new Rings(stargate);
             stargateRef.terminate();
         });
+    }
+
+    public String getIdentifier() {
+        return "rings";
     }
 
     /**
@@ -108,10 +108,6 @@ public class Rings extends Structure {
         document.put("uuid", uuid.toString());
         document.put("structure", super.getDocument());
         return document;
-    }
-
-    public static String getIdentifier() {
-        return "rings";
     }
 
     /* Macro Getter functions */
@@ -191,43 +187,39 @@ public class Rings extends Structure {
      */
     public void build() {
         if (!getLocation().getChunk().isLoaded()) return;
-        double yOffset = 1.8125;
+        double yOffset = -0.75 - 0.125;
 
         World world = getWorld();
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
-        int outer = 34;
-        for (int i = 0; i < outer; i++) {
 
-            double unitCircle = (2 * Math.PI);
+        BlockStand innerRing = new BlockStand(uuid, world);
 
-            double outerDelta = unitCircle / 34;
-            double outerAngle = outerDelta * i + outerDelta * 8.5;
+        Location innerLocation = centerLocation.getBlock().getLocation().add(0.5, 2 + 0.3125 / 2, 0.5);
+        innerRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
+        innerRing.createRing(innerLocation, 16, new Vector(2.5, 2.5, 0), false);
 
-            double outerX = Math.cos(outerDelta * i) * 3.25;
-            double outerY = Math.sin(outerDelta * i) * 3.25;
+        innerRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
+        innerRing.createRing(innerLocation, 16, new Vector(2.48, 2.48, 0), true);
 
-            BlockStand outerRing = new BlockStand(uuid, world);
+        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
+        innerRing.createRing(innerLocation.add(0, -0.3125 / 4, 0), 12, new Vector(1.875, 1.875, 0), false);
 
-            Location outerLocation = centerLocation.clone().add(getOrientation().rotate(outerX, outerY, (i % 2 == 0 ? 0.005 : -0.005)));
-            outerRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
-            Vector outerRotation = getOrientation().rotate(0, 0, -outerAngle);
-            outerRing.largeBlockAt(outerLocation, new EulerAngle(outerRotation.getX(), outerRotation.getY(), outerRotation.getZ()));
+        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
+        innerRing.createRing(innerLocation, 12, new Vector(1.855, 1.855, 0), true);
+
+        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
+        innerRing.createRing(innerLocation.add(0, -0.3125 / 8, 0), 8, new Vector(1.25, 1.25, 0), false);
+
+        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
+        innerRing.createRing(innerLocation, 8, new Vector(1.23, 1.23, 0), true);
+
+        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
+        innerRing.createRing(innerLocation.add(0, -0.3125 / 16, 0), 8, new Vector(0.625, 0.625, 0), false);
+
+        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
+        innerRing.createRing(innerLocation, 8, new Vector(0.625, 0.625, 0), true);
 
 
-            if (i > 32) continue;
-            double innerDelta = unitCircle / 32;
-            double innerAngle = innerDelta * i + innerDelta * 8;
-
-            double innerX = Math.cos(innerDelta * i) * 3;
-            double innerY = Math.sin(innerDelta * i) * 3;
-
-            BlockStand innerRing = new BlockStand(uuid, world);
-            Location innerLocation = centerLocation.clone().add(getOrientation().rotate(innerX, innerY, (i % 2 == 0 ? 0.002 : -0.002)));
-            innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-            Vector innerRotation = getOrientation().rotate(0, 0, -innerAngle);
-            innerRing.largeBlockAt(innerLocation, new EulerAngle(innerRotation.getX(), innerRotation.getY(), innerRotation.getZ()));
-
-        }
     }
 
     /**
@@ -235,9 +227,9 @@ public class Rings extends Structure {
      */
     public void destroy() {
         if (!getLocation().getChunk().isLoaded()) return;
-        Vector v = getOrientation().translate(4, 4, 1);
-        Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(BoundingBox.of(getLocation().clone().add(0, 2.5, 0), v.getX(), v.getY(), v.getZ()), e -> BlockStand.isArmorStand(e, uuid));
-        Bukkit.broadcastMessage(nearbyEntities.size() + " stargate armor stands removed... !");
+        Vector v = getOrientation().translate(4, 1, 4);
+        Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(BoundingBox.of(getLocation().clone().add(0, 0.5, 0), v.getX(), v.getY(), v.getZ()).expand(0, 4, 0), e -> BlockStand.isArmorStand(e, uuid));
+        Bukkit.broadcastMessage(nearbyEntities.size() + " ring armor stands removed... !");
         nearbyEntities.forEach(Entity::remove);
     }
 
