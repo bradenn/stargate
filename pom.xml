@@ -99,7 +99,7 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
-
+         
     <profiles>
         <profile>
             <id>github</id>
