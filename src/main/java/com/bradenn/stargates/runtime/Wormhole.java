@@ -2,88 +2,73 @@ package com.bradenn.stargates.runtime;
 
 import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.cosmetics.ProgressBar;
-import com.bradenn.stargates.structures.Stargate;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
+import com.bradenn.stargates.structures.Port;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+public class Wormhole {
 
-public class Wormhole implements Ephemeral {
-
-    private final Stargate source, target;
+    private final Port to, from;
+    private final long expiration;
+    private long ticks;
     private ProgressBar progressBar;
-    private final List<Player> playerList;
-    private float ticks;
 
-    public Wormhole(Stargate source, Stargate target) {
-        this.source = source;
-        this.target = target;
+    public Wormhole(Port from, Port to, long expiration) throws Exception {
+        if (from.isLocked()) throw new Exception("This port is already in use.");
+        if (to.isLocked()) throw new Exception("Destination port is in use.");
+        this.from = from;
+        this.to = to;
+        this.expiration = expiration;
+        this.progressBar = null;
         this.ticks = 0;
-        this.playerList = new ArrayList<>();
+
+        establishConnection();
     }
 
-    private void addNearbyPlayers(Location location) {
-        World world = location.getWorld();
-        if (world == null) return;
+    private void severConnection() {
 
-        world.getNearbyEntities(location, 16, 16, 16, this::isPlayer)
-                .forEach(this::enrollPlayer);
+        from.closePort();
+        to.closePort();
+
+        from.unlock();
+        to.unlock();
+
+        progressBar.terminate();
     }
 
-    private boolean isPlayer(Entity entity) {
-        return entity instanceof Player;
+    private void establishConnection() {
+
+
+        from.lock();
+        from.openPort();
+
+        to.lock();
+        to.openPort();
+
+        String progressBarTitle = String.format("%s%s %s→ %s%s", Messages.mono4, from.getName(), Messages.mono2, Messages.mono4, to.getName());
+        this.progressBar = new ProgressBar(progressBarTitle, (float)expiration/20, 0.05f);
+        this.progressBar.addNearbyPlayers(to.getLocation());
+        this.progressBar.addNearbyPlayers(from.getLocation());
     }
 
-    private void enrollPlayer(Entity entity) {
-        playerList.add((Player) entity);
+    public boolean tick() {
+        ticks+=1;
+        if (ticks <= expiration) {
+            progressBar.decrement();
+            to.idle();
+            from.idle();
+        } else {
+            severConnection();
+            return false;
+        }
+        return true;
     }
 
-    public void eventHorizonPredicate(Player player) {
-        if (player.getBoundingBox().overlaps(source.getBoundingBox())) {
-            target.summonPlayer(player);
+    public void acceptPlayer(Player player) {
+        if (player.getBoundingBox().overlaps(from.getTriggerArea())) {
+            from.departPlayer(player);
+            to.summonPlayer(player);
         }
     }
 
-    public float getTicks() {
-        return ticks;
-    }
-
-    public void tick() {
-        ticks++;
-    }
-
-    public float getLifeTicks() {
-        return 12 * 20; /* 12 seconds at 20 ticks per second. */
-    }
-
-    public float getUpdateTicks() {
-        return 4; /* 1/5 of a second at 20 ticks per second. */
-    }
-
-    public List<UUID> getUUIDS() {
-        return List.of(source.getUUID(), target.getUUID());
-    }
-
-    public void initiate() {
-        addNearbyPlayers(source.getLocation());
-        String progressBarTitle = String.format("%s%s %s→ %s%s", Messages.mono4, source.getName(), Messages.mono2, Messages.mono4, target.getName());
-        progressBar = new ProgressBar(progressBarTitle, playerList, 10, 0.2f);
-        source.renderOpeningPortal();
-    }
-
-    public void update() {
-        progressBar.decrement();
-        source.renderPortal();
-        target.renderPortal();
-        playerList.forEach(this::eventHorizonPredicate);
-    }
-
-    public void terminate() {
-        progressBar.terminate();
-    }
 
 }

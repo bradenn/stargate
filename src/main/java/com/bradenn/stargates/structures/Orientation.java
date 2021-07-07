@@ -1,6 +1,8 @@
 package com.bradenn.stargates.structures;
 
+import com.bradenn.stargates.animations.Animation;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -87,6 +89,11 @@ public enum Orientation implements ConfigurationSerializable {
                 return new Vector(-z, y, x);
         }
         return new Vector(0, 0, 0);
+    }
+
+    public EulerAngle translateAngle(double x, double y, double z) {
+        Vector v = rotateSpin(x, y, z);
+        return new EulerAngle(v.getX(), v.getY(), v.getZ());
     }
 
     public Vector rotateSpin(double x, double y, double z) {

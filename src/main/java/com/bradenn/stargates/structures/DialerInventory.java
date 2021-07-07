@@ -1,5 +1,6 @@
 package com.bradenn.stargates.structures;
 
+import com.bradenn.stargates.inventory.DestinationItem;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -38,11 +39,6 @@ public class DialerInventory implements InventoryHolder {
         Stargate.getAll().forEach(this::addDestination);
     }
 
-    private static String format(String message, Object... args) {
-        String formatted = String.format(message, args);
-        return ChatColor.translateAlternateColorCodes('&', formatted);
-    }
-
     public Stargate getStargate() {
         return stargate;
     }
@@ -54,56 +50,7 @@ public class DialerInventory implements InventoryHolder {
     private void addDestination(Stargate stargate) {
         if (stargate.getUUID().equals(this.stargate.getUUID())) return;
 
-        World gateWorld = stargate.getLocation().getWorld();
-        Material material;
-        String address = "&7Address: &7" + stargate.getAddress();
-        String world = "&7World: ";
-        String gateModel = "&7Model: &7" + stargate.getModel();
-
-        switch (Objects.requireNonNull(gateWorld).getEnvironment()) {
-            case NORMAL:
-                material = Material.GRASS_BLOCK;
-                world += "&aOverworld";
-                break;
-            case NETHER:
-                material = Material.NETHERRACK;
-                world += "&cNether";
-                break;
-            case THE_END:
-                material = Material.END_STONE;
-                world += "&dEnd";
-                break;
-            default:
-                material = Material.BEDROCK;
-                world += "&8Unknown";
-                break;
-        }
-
-        ItemStack itemStack = new ItemStack(material);
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        String title = String.format("&f%s", stargate.getName());
-        assert itemMeta != null;
-        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', title));
-
-        List<String> lore = new ArrayList<>();
-
-        lore.add(format(address));
-        lore.add(format(world));
-        lore.add(format(gateModel));
-        if (!this.stargate.getModel().isMk2()) {
-            if (!gateWorld.equals(this.stargate.getLocation().getWorld())) {
-                lore.add(format("&cMK2 Stargate required."));
-                itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
-                itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            }
-
-        }
-
-        itemMeta.setLore(lore);
-
-        itemStack.setItemMeta(itemMeta);
-        inventory.addItem(itemStack);
+        inventory.addItem(new DestinationItem(stargate));
     }
 
     public void openInventory(Player player) {

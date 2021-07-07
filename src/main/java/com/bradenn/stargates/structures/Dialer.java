@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.EulerAngle;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -29,7 +30,7 @@ public class Dialer extends Structure {
      * @param orientation The N W S E orientation of the dialer.
      */
     public Dialer(String name, Location base, BoundingBox bounds, Orientation orientation) {
-        super(base, bounds, orientation);
+        super(name, base, bounds, orientation);
         this.name = name;
         this.model = StargateModel.MK1;
         this.uuid = UUID.randomUUID();
@@ -202,7 +203,7 @@ public class Dialer extends Structure {
 
 
             double y = i % 4 == 0 ? 0.002 : (i % 2 == 0 ? 0.003 : -0.005);
-            Location outerLocation = centerLocation.clone().add(baseX, y, baseY);
+            Location outerLocation = centerLocation.clone().add(getOrientation().translate(baseX, y, baseY));
             baseRing.setRotation((float) Math.toDegrees(baseAngle), 0);
             baseRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
             baseRing.largeBlockAt(outerLocation, new EulerAngle(0, 0, 0));
@@ -210,7 +211,7 @@ public class Dialer extends Structure {
         }
 
         baseRing.setMaterial(Material.POLISHED_DEEPSLATE);
-        baseRing.largeBlockAt(centerLocation.clone().add(0, -0.25, 0), new EulerAngle(0, 0, 0));
+        baseRing.largeBlockAt(centerLocation.clone().add(getOrientation().translate(0, -0.25, 0)), new EulerAngle(0, 0, 0));
 
         baseRing.setMaterial(Material.POLISHED_DEEPSLATE);
         baseRing.largeBlockAt(centerLocation.clone().add(0, -1 + 0.125, 0), new EulerAngle(0, 0, 0));

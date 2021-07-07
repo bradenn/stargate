@@ -9,6 +9,15 @@ import java.util.UUID;
 
 public interface Persistent {
 
+    default void rebuild() {
+        destroy();
+        build();
+    }
+
+    void build();
+
+    void destroy();
+
     Document getDocument();
 
     default String getIdentifier() {

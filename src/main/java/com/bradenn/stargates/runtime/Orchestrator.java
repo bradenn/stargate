@@ -1,6 +1,7 @@
 package com.bradenn.stargates.runtime;
 
 import com.bradenn.stargates.Main;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -9,41 +10,41 @@ import java.util.UUID;
 
 public class Orchestrator {
 
-    private static List<Ephemeral> ephemeralList;
-    private static List<UUID> occupiedUUIDS;
+    private static List<Wormhole> activeWormholes;
+    private static List<UUID> lockedPorts;
 
 
     public Orchestrator() {
-        ephemeralList = new ArrayList<>();
-        occupiedUUIDS = new ArrayList<>();
-        run();
+        activeWormholes = new ArrayList<>();
+        lockedPorts = new ArrayList<>();
+
     }
 
-    public static void add(Ephemeral ephemeralObject) throws Exception {
-        List<UUID> uuids = new ArrayList<>(List.copyOf(ephemeralObject.getUUIDS()));
-        if (uuids.removeAll(occupiedUUIDS)) {
-            throw new Exception("Wormhole is busy.");
-        }
-        occupiedUUIDS.addAll(ephemeralObject.getUUIDS());
-        ephemeralList.add(ephemeralObject);
-        ephemeralObject.initiate();
+    public static void lock(UUID uuid) {
+        lockedPorts.add(uuid);
+    }
+
+    public static void unlock(UUID uuid) {
+        lockedPorts.remove(uuid);
+    }
+
+    public static boolean checkLock(UUID uuid) {
+        return lockedPorts.contains(uuid);
+    }
+
+    public static void addWormhole(Wormhole wormhole) {
+        activeWormholes.add(wormhole);
+    }
+
+    public static void checkTrigger(Player player) {
+        activeWormholes.forEach(w -> w.acceptPlayer(player));
     }
 
     public void run() {
         new BukkitRunnable() {
             public void run() {
-                ephemeralList.forEach(ephemeral -> {
-                    ephemeral.tick();
-                    if (ephemeral.getTicks() % ephemeral.getLifeTicks() == 0) {
-                        ephemeral.terminate();
-                        occupiedUUIDS.removeAll(ephemeral.getUUIDS());
-                        ephemeralList.remove(ephemeral);
-                    } else if (ephemeral.getTicks() % ephemeral.getUpdateTicks() == 0) {
-                        ephemeral.update();
-                    }
-                });
+                activeWormholes.removeIf(wormhole -> !wormhole.tick());
             }
         }.runTaskTimer(Main.plugin, 0, 1);
     }
-
 }

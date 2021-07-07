@@ -1,6 +1,8 @@
 package com.bradenn.stargates.cosmetics;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -16,12 +18,23 @@ public class ProgressBar {
     private float remaining;
     private final BossBar bossBar;
 
-    public ProgressBar(String title, List<Player> playerList, float maxValue, float delta) {
+    public ProgressBar(String title, float maxValue, float delta) {
         this.bossBar = Bukkit.createBossBar(title, BarColor.BLUE, BarStyle.SEGMENTED_10);
         this.maxValue = maxValue;
         this.remaining = maxValue;
         this.delta = delta;
-        playerList.forEach(this::enrollPlayer);
+    }
+
+    private boolean isPlayer(Entity entity) {
+        return entity instanceof Player;
+    }
+
+    public void addNearbyPlayers(Location location) {
+        World world = location.getWorld();
+        if (world == null) return;
+
+        world.getNearbyEntities(location, 16, 16, 16, this::isPlayer)
+                .forEach(this::enrollPlayer);
     }
 
     private void enrollPlayer(Entity entity) {

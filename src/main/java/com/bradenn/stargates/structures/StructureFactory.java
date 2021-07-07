@@ -26,7 +26,7 @@ public class StructureFactory {
     public enum StructureType {
         STARGATE(new Vector(0, -0.5, 0), new Vector(0.5, 2.5, 0.5), new Vector(1.75, 1.75, -0.33)),
         DIALER(new Vector(3, -0.5, 2), new Vector(3, 1, 2), new Vector(1, 1, 1)),
-        RINGS(new Vector(0, -0.75, 0), new Vector(0, -0.75, 0), new Vector(3, 3, 3));
+        RINGS(new Vector(0, -0.75, 0), new Vector(0, 1, 0), new Vector(3, 2, 3));
 
         Vector offset, boundsOffset, bounds;
 

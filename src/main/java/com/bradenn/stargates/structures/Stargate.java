@@ -11,8 +11,6 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
@@ -20,7 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Stargate extends Structure {
+public class Stargate extends Structure implements Port {
 
     /* Private variables */
 
@@ -53,7 +51,7 @@ public class Stargate extends Structure {
      * @param orientation The N W S E orientation of the stargate.
      */
     public Stargate(String name, Location base, BoundingBox bounds, Orientation orientation) {
-        super(base, bounds, orientation);
+        super(name, base, bounds, orientation);
 
         this.name = name;
         this.model = StargateModel.MK1;
@@ -141,11 +139,28 @@ public class Stargate extends Structure {
         return uuid;
     }
 
+    public BoundingBox getTriggerArea() {
+        return getBoundingBox();
+    }
+
+    @Override
+    public void openPort() {
+
+    }
+
+    @Override
+    public void closePort() {
+
+    }
+
+    @Override
+    public void idle() {
+        renderPortal();
+    }
+
     public String getName() {
         return name;
     }
-
-    /* Static Class Constructors */
 
     public String getAddress() {
         return address;
@@ -225,10 +240,12 @@ public class Stargate extends Structure {
         safeTeleport.getChunk().load();
         safeTeleport.setYaw(getOrientation().playerYaw());
 
-        PotionEffect potionEffect = new PotionEffect(PotionEffectType.CONFUSION, 100, 10, true);
-        player.addPotionEffect(potionEffect);
         player.teleport(safeTeleport, PlayerTeleportEvent.TeleportCause.PLUGIN);
         player.setVelocity(getOrientation().translate(0, 0, 0.2));
+    }
+
+    public void departPlayer(Player player) {
+
     }
 
     /**
@@ -236,67 +253,24 @@ public class Stargate extends Structure {
      */
     public void build() {
         if (!getLocation().getChunk().isLoaded()) return;
-        double yOffset = 1.8125;
+        double yOffset = 3.25;
 
         World world = getWorld();
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
-        int outer = 34;
-        for (int i = 0; i < outer; i++) {
-
-            double unitCircle = (2 * Math.PI);
-
-            double outerDelta = unitCircle / 34;
-            double outerAngle = outerDelta * i + outerDelta * 8.5;
-
-            double outerX = Math.cos(outerDelta * i) * 3.25;
-            double outerY = Math.sin(outerDelta * i) * 3.25;
-
-            BlockStand outerRing = new BlockStand(uuid, world);
-
-            Location outerLocation = centerLocation.clone().add(getOrientation().rotate(outerX, outerY, (i % 2 == 0 ? 0.005 : -0.005)));
-            outerRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
-            Vector outerRotation = getOrientation().rotate(0, 0, -outerAngle);
-            outerRing.largeBlockAt(outerLocation, new EulerAngle(outerRotation.getX(), outerRotation.getY(), outerRotation.getZ()));
-
-
-            if (i > 32) continue;
-            double innerDelta = unitCircle / 32;
-            double innerAngle = innerDelta * i + innerDelta * 8;
-
-            double innerX = Math.cos(innerDelta * i) * 3;
-            double innerY = Math.sin(innerDelta * i) * 3;
-
-            BlockStand innerRing = new BlockStand(uuid, world);
-            Location innerLocation = centerLocation.clone().add(getOrientation().rotate(innerX, innerY, (i % 2 == 0 ? 0.002 : -0.002)));
-            innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-            Vector innerRotation = getOrientation().rotate(0, 0, -innerAngle);
-            innerRing.largeBlockAt(innerLocation, new EulerAngle(innerRotation.getX(), innerRotation.getY(), innerRotation.getZ()));
-
-            int chevronCount = 8;
-            if (getModel().equals(StargateModel.MK2)) {
-                chevronCount = 16;
-            }
-            if (i > chevronCount * 2) continue;
-            double chevronDelta = unitCircle / chevronCount;
-
-            double chevronAngle = chevronDelta * i + chevronDelta * (getModel().equals(StargateModel.MK2) ? 4 : 2);
-
-            double chevronX = Math.cos(chevronDelta * i) * 3.125;
-            double chevronY = Math.sin(chevronDelta * i) * 3.125;
-
-            BlockStand chevronRing = new BlockStand(uuid, world);
-            Location chevronLocationA = centerLocation.clone().add(getOrientation().rotate(chevronX, chevronY, (i % 2 == 0 ? 0.025 : -0.025)));
-            Location chevronLocationB = centerLocation.clone().add(getOrientation().rotate(chevronX, chevronY, (i % 2 == 0 ? -0.025 : 0.025)));
-            if (getModel().equals(StargateModel.MK1)) {
-                chevronRing.setMaterial(Material.WAXED_CUT_COPPER_SLAB);
-            } else {
-                chevronRing.setMaterial(Material.DARK_PRISMARINE_SLAB);
-            }
-
-            Vector chevronRotation = getOrientation().rotateSpin(0, 0, -chevronAngle);
-            chevronRing.largeBlockAt(chevronLocationA, new EulerAngle(chevronRotation.getX(), chevronRotation.getY(), chevronRotation.getZ()));
-            chevronRing.largeBlockAt(chevronLocationB, new EulerAngle(chevronRotation.getX(), chevronRotation.getY(), chevronRotation.getZ()));
+        BlockStand ring = new BlockStand(uuid, world);
+        ring.setMaterial(Material.DEEPSLATE_TILE_SLAB);
+        ring.createRing(centerLocation, 34, new Vector(3.25, 3.25, 0), false, getOrientation());
+        ring.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
+        ring.createRing(centerLocation.clone().add(getOrientation().translate(0,0,-0.005)), 32, new Vector(3, 3, 0), false, getOrientation());
+        if (getModel().equals(StargateModel.MK1)) {
+            ring.setMaterial(Material.WAXED_CUT_COPPER_SLAB);
+            ring.createRing(centerLocation.clone().add(getOrientation().translate(0,0,0.025)), 8, new Vector(3.125, 3.125, 0), false, getOrientation());
+            ring.createRing(centerLocation.clone().add(getOrientation().translate(0,0,-0.025)), 8, new Vector(3.125, 3.125, 0), false, getOrientation());
+        } else {
+            ring.setMaterial(Material.DARK_PRISMARINE_SLAB);
+            ring.createRing(centerLocation.clone().add(getOrientation().translate(0,0,-0.0025)), 32, new Vector(3.125, 3.125, 0), false, getOrientation());
         }
+
     }
 
     /**

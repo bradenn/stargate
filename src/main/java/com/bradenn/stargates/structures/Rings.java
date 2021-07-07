@@ -1,7 +1,9 @@
 package com.bradenn.stargates.structures;
 
 import com.bradenn.stargates.Database;
+import com.bradenn.stargates.animations.Animation;
 import com.bradenn.stargates.cosmetics.BlockStand;
+import com.bradenn.stargates.cosmetics.DynamicStructure;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
@@ -9,20 +11,17 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Rings extends Structure {
-
-    /* Private variables */
+public class Rings extends Structure implements Port {
 
     private final UUID uuid;
     private final String name;
+    private boolean lock;
 
     /**
      * Load rings from database document.
@@ -32,23 +31,23 @@ public class Rings extends Structure {
     public Rings(Document document) {
         super((Document) document.get("structure"));
         this.name = document.getString("name");
+        this.lock = false;
         this.uuid = UUID.fromString(document.getString("uuid"));
     }
 
-    /* Initialization functions */
-
     /**
-     * Create a new stargate.
+     * Create a new ring.
      *
      * @param name        Name of the stargate.
      * @param base        The y + 1 location of the stargate.
      * @param orientation The N W S E orientation of the stargate.
      */
     public Rings(String name, Location base, BoundingBox bounds, Orientation orientation) {
-        super(base, bounds, orientation);
+        super(name, base, bounds, orientation);
 
         this.name = name;
         this.uuid = UUID.randomUUID();
+        this.lock = false;
 
         build();
         save();
@@ -144,28 +143,6 @@ public class Rings extends Structure {
         }
     }
 
-    /**
-     * Draw the particle accretion disk of the stargate.
-     */
-    public void renderOpeningPortal() {
-//        Location center = getLocation().clone().add(0, 3, 0);
-//        World world = center.getWorld();
-//        if (Objects.isNull(world)) return;
-//        double itr = 0.8;
-//        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.PURPLE.getColor(), 2);
-//        for (double j = 0; j < 3; j += 0.2) {
-//            double particleCount = 4 * j;
-//            for (double i = 0; i < particleCount; i += 0.2) {
-//                double delta = (Math.PI * 2) / particleCount;
-//                double posX = Math.cos(delta * i) * j;
-//                double posY = Math.sin(delta * i) * j;
-//                double posZ = -Math.abs(itr * Math.pow(j, 2)) + itr * 9;
-//                Vector adjusted = getOrientation().translate(posX, posY, posZ);
-//                world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, blueDust);
-//            }
-//        }
-    }
-
     /* Structure functions */
 
     /**
@@ -175,11 +152,67 @@ public class Rings extends Structure {
         Location safeTeleport = getLocation().clone().add(0, 1, 0);
         safeTeleport.getChunk().load();
         safeTeleport.setYaw(getOrientation().playerYaw());
-
-        PotionEffect potionEffect = new PotionEffect(PotionEffectType.CONFUSION, 100, 10, true);
-        player.addPotionEffect(potionEffect);
+        showFlash();
         player.teleport(safeTeleport, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        player.setVelocity(getOrientation().translate(0, 0, 0.2));
+        unlock();
+    }
+
+    @Override
+    public void departPlayer(Player player) {
+        Animation animation = new Animation(120, 1);
+        animation.setKeyframe(10, e -> showRing());
+        animation.setKeyframe(48, e -> showFlash());
+        animation.setKeyframe(120, e -> unlock());
+        animation.run(e -> {
+        });
+    }
+
+    public boolean isLocked() {
+        return lock;
+    }
+
+    public void unlock() {
+        lock = false;
+    }
+
+    public void lock() {
+        lock = true;
+    }
+
+    public BoundingBox getTriggerArea() {
+        return getBoundingBox();
+    }
+
+    @Override
+    public void openPort() {
+
+    }
+
+    @Override
+    public void closePort() {
+
+    }
+
+    @Override
+    public void idle() {
+
+    }
+
+    public void showFlash() {
+        Location center = getLocation().clone().add(0, 0.1, 0);
+        World world = center.getWorld();
+        if (Objects.isNull(world)) return;
+
+        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.BLUE.getColor(), 1);
+        for (double i = 0; i < 3; i += 0.2) {
+            for (double j = 0; j < 128; j += 1) {
+                double delta = (Math.PI * 2) / 100;
+                double posX = Math.cos(delta * j) * 2.1875;
+                double posY = Math.sin(delta * j) * 2.1875;
+                Vector adjusted = getOrientation().translate(posX, i, posY);
+                world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, blueDust);
+            }
+        }
     }
 
     /**
@@ -196,31 +229,42 @@ public class Rings extends Structure {
 
         Location innerLocation = centerLocation.getBlock().getLocation().add(0.5, 2 + 0.3125 / 2, 0.5);
         innerRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
-        innerRing.createRing(innerLocation, 16, new Vector(2.5, 2.5, 0), false);
-
-        innerRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
-        innerRing.createRing(innerLocation, 16, new Vector(2.48, 2.48, 0), true);
+        innerRing.createRing(innerLocation, 16, new Vector(2.1875, 2.1875, 0), false);
 
         innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-        innerRing.createRing(innerLocation.add(0, -0.3125 / 4, 0), 12, new Vector(1.875, 1.875, 0), false);
-
-        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-        innerRing.createRing(innerLocation, 12, new Vector(1.855, 1.855, 0), true);
-
-        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-        innerRing.createRing(innerLocation.add(0, -0.3125 / 8, 0), 8, new Vector(1.25, 1.25, 0), false);
-
-        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-        innerRing.createRing(innerLocation, 8, new Vector(1.23, 1.23, 0), true);
-
-        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-        innerRing.createRing(innerLocation.add(0, -0.3125 / 16, 0), 8, new Vector(0.625, 0.625, 0), false);
-
-        innerRing.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-        innerRing.createRing(innerLocation, 8, new Vector(0.625, 0.625, 0), true);
+        innerRing.createRing(innerLocation, 16, new Vector(2.1875 - 0.015, 2.1875 - 0.015, 0), true);
 
 
     }
+
+    public void showRing() {
+        double yOffset = -0.75 - 0.125;
+
+        Location centerLocation = getLocation().clone().add(0, yOffset, 0);
+        Location innerLocation = centerLocation.getBlock().getLocation().add(0.5, 2 + 0.3125 / 2, 0.5);
+
+        Animation animation = new Animation(80, 1);
+        animation.setKeyframe(1, e -> animateRing(innerLocation, 80, (double) 1 / 8));
+        animation.setKeyframe(11, e -> animateRing(innerLocation, 60, (double) 1 / 8));
+        animation.setKeyframe(21, e -> animateRing(innerLocation, 40, (double) 1 / 8));
+        animation.setKeyframe(31, e -> animateRing(innerLocation, 20, (double) 1 / 8));
+        animation.run(e -> {
+        });
+    }
+
+    private void animateRing(Location center, int duration, double modifier) {
+        DynamicStructure dynamicStructure = new DynamicStructure(center.getWorld(), Material.DARK_PRISMARINE_SLAB);
+
+        Animation animation = new Animation(duration, 1);
+        dynamicStructure.generateRing(center, 16, new Vector(2.1875, 2.1875, 0), false);
+        dynamicStructure.generateRing(center, 16, new Vector(2.1875 - 0.015, 2.1875 - 0.015, 0), true);
+        animation.setKeyframe(duration, frame -> dynamicStructure.removeAll());
+        animation.run(i -> {
+            double unit = ((Math.PI * 2) / duration);
+            dynamicStructure.translateAll(new Vector(0, Math.pow(Math.sin(unit * i), 3) * modifier, 0));
+        });
+    }
+
 
     /**
      * Find and remove all structure-related objects.

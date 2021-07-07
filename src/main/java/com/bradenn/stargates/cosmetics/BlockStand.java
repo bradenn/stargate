@@ -1,5 +1,6 @@
 package com.bradenn.stargates.cosmetics;
 
+import com.bradenn.stargates.structures.Orientation;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -59,6 +60,16 @@ public class BlockStand {
             double dy = Math.sin(unit * i + off) * size.getY();
 
             smallBlockAt(center.clone().add(dx, i * 4E-4 - (offset ? 0.02 : 0), dy), new EulerAngle(0, unit * i + off, 0));
+        }
+    }
+
+    public void createRing(Location center, double count, Vector size, boolean offset, Orientation orientation) {
+        double unit = (Math.PI * 2) / count;
+        for (double i = 0; i < count; i++) {
+            double dx = Math.cos(unit * i) * size.getX();
+            double dy = Math.sin(unit * i) * size.getY();
+
+            smallBlockAt(center.clone().add(orientation.translate(dx, dy, i*1E-4)), orientation.translateAngle(0, 0, unit * i + Math.PI/2));
         }
     }
 
