@@ -1,10 +1,14 @@
-package com.bradenn.stargates.structures;
+package com.bradenn.stargates.structures.rings;
 
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.animations.Animation;
 import com.bradenn.stargates.cosmetics.BlockStand;
 import com.bradenn.stargates.cosmetics.DynamicStructure;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
+import com.bradenn.stargates.structures.dialer.Dialer;
+import com.bradenn.stargates.structures.Orientation;
+import com.bradenn.stargates.structures.Port;
+import com.bradenn.stargates.structures.Structure;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.bukkit.*;
@@ -21,7 +25,6 @@ public class Rings extends Structure implements Port {
 
     private final UUID uuid;
     private final String name;
-    private boolean lock;
 
     /**
      * Load rings from database document.
@@ -31,7 +34,6 @@ public class Rings extends Structure implements Port {
     public Rings(Document document) {
         super((Document) document.get("structure"));
         this.name = document.getString("name");
-        this.lock = false;
         this.uuid = UUID.fromString(document.getString("uuid"));
     }
 
@@ -47,7 +49,6 @@ public class Rings extends Structure implements Port {
 
         this.name = name;
         this.uuid = UUID.randomUUID();
-        this.lock = false;
 
         build();
         save();
@@ -76,24 +77,6 @@ public class Rings extends Structure implements Port {
     }
 
     /* Getter functions */
-
-    /**
-     * Rebuild all of the stargates.
-     */
-    public static void rebuildAll() {
-        Database.getCollection("rings").find().forEach((Consumer<? super Document>) stargate -> new Rings(stargate).rebuild());
-    }
-
-    /**
-     * Destroy all of the stargate structures and remove them from the database.
-     */
-    public static void terminateAll() {
-        Database.getCollection("rings").find().forEach((Consumer<? super Document>) stargate -> {
-            Rings stargateRef = new Rings(stargate);
-            stargateRef.terminate();
-        });
-    }
-
     public String getIdentifier() {
         return "rings";
     }
@@ -165,18 +148,6 @@ public class Rings extends Structure implements Port {
         animation.setKeyframe(120, e -> unlock());
         animation.run(e -> {
         });
-    }
-
-    public boolean isLocked() {
-        return lock;
-    }
-
-    public void unlock() {
-        lock = false;
-    }
-
-    public void lock() {
-        lock = true;
     }
 
     public BoundingBox getTriggerArea() {
@@ -265,7 +236,6 @@ public class Rings extends Structure implements Port {
         });
     }
 
-
     /**
      * Find and remove all structure-related objects.
      */
@@ -273,20 +243,9 @@ public class Rings extends Structure implements Port {
         if (!getLocation().getChunk().isLoaded()) return;
         Vector v = getOrientation().translate(4, 1, 4);
         Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(BoundingBox.of(getLocation().clone().add(0, 0.5, 0), v.getX(), v.getY(), v.getZ()).expand(0, 4, 0), e -> BlockStand.isArmorStand(e, uuid));
-        Bukkit.broadcastMessage(nearbyEntities.size() + " ring armor stands removed... !");
         nearbyEntities.forEach(Entity::remove);
     }
 
-    /**
-     * Destroy the stargate structure and remove it from the database.
-     */
-    public void terminate() {
-        this.destroy();
-        Database.getCollection("stargates").findOneAndDelete(new Document("uuid", getUUID().toString()));
-        Document dialer = Database.getCollection("dialers").findOneAndDelete(new Document("stargateUUID", getUUID().toString()));
-        assert dialer != null;
-        new Dialer(dialer).destroy();
-    }
 
 
 }

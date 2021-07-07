@@ -69,7 +69,7 @@ public class BlockStand {
             double dx = Math.cos(unit * i) * size.getX();
             double dy = Math.sin(unit * i) * size.getY();
 
-            smallBlockAt(center.clone().add(orientation.translate(dx, dy, i*1E-4)), orientation.translateAngle(0, 0, unit * i + Math.PI/2));
+            smallBlockAt(center.clone().add(orientation.translate(dx, dy, i*5E-4)), orientation.translateAngle(0, 0, unit * i + Math.PI/2));
         }
     }
 

@@ -1,12 +1,11 @@
 package com.bradenn.stargates.inventory;
 
 import com.bradenn.stargates.structures.Port;
-import com.bradenn.stargates.structures.Stargate;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class StargateMenu extends Menu {
 

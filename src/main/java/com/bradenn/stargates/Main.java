@@ -2,11 +2,10 @@ package com.bradenn.stargates;
 
 import com.bradenn.stargates.commands.StargateCommand;
 import com.bradenn.stargates.runtime.Orchestrator;
-import com.bradenn.stargates.runtime.Wormhole;
-import com.bradenn.stargates.structures.Dialer;
-import com.bradenn.stargates.structures.Rings;
-import com.bradenn.stargates.structures.Stargate;
 import com.bradenn.stargates.structures.StructureManager;
+import com.bradenn.stargates.structures.dialer.Dialer;
+import com.bradenn.stargates.structures.rings.Rings;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
@@ -28,12 +27,6 @@ public class Main extends JavaPlugin {
         init();
     }
 
-    @Nullable
-    @Override
-    public ChunkGenerator getDefaultWorldGenerator(@NotNull String worldName, @Nullable String id) {
-        return super.getDefaultWorldGenerator(worldName, id);
-    }
-
     private void init() {
         plugin = this;
 
@@ -43,15 +36,13 @@ public class Main extends JavaPlugin {
         PluginCommand stargateCommand = getCommand("stargate");
         new StargateCommand(stargateCommand);
 
-        orchestrator = new Orchestrator();
-        orchestrator.run();
         Database.connect();
 
-//        Orchestrator.activateWormhole(new Wormhole(Rings.getAll().get(0), Rings.getAll().get(1)));
+        StructureManager.init();
+        StructureManager.rebuildAll();
 
-        Stargate.rebuildAll();
-        Dialer.rebuildAll();
-        Rings.rebuildAll();
+        orchestrator = new Orchestrator();
+        orchestrator.run();
 
     }
 }

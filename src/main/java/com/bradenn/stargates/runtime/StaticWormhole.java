@@ -2,7 +2,7 @@ package com.bradenn.stargates.runtime;
 
 import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.cosmetics.ProgressBar;
-import com.bradenn.stargates.structures.Stargate;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;

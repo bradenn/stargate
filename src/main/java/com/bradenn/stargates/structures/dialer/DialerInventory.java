@@ -1,22 +1,14 @@
-package com.bradenn.stargates.structures;
+package com.bradenn.stargates.structures.dialer;
 
 import com.bradenn.stargates.inventory.DestinationItem;
-import net.md_5.bungee.api.ChatColor;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 

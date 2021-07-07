@@ -1,7 +1,12 @@
-package com.bradenn.stargates.structures;
+package com.bradenn.stargates.structures.dialer;
 
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
+import com.bradenn.stargates.structures.Interactive;
+import com.bradenn.stargates.structures.Orientation;
+import com.bradenn.stargates.structures.StargateModel;
+import com.bradenn.stargates.structures.Structure;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.bukkit.Location;
@@ -11,11 +16,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.EulerAngle;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Dialer extends Structure {
+public class Dialer extends Structure implements Interactive {
 
     private final StargateModel model;
     private final String name;
@@ -61,14 +65,6 @@ public class Dialer extends Structure {
         Database.getCollection("dialers").find().map(Dialer::new).forEach((Consumer<? super Dialer>) dialers::add);
         return dialers;
     }
-
-    /**
-     * Find, destroy, and rebuild all dialers.
-     */
-    public static void rebuildAll() {
-        Database.getCollection("dialers").find().forEach((Consumer<? super Document>) dialer -> new Dialer(dialer).rebuild());
-    }
-
     /**
      * Get a dialer object from its UUID.
      */
@@ -227,4 +223,5 @@ public class Dialer extends Structure {
         Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(getBoundingBox().clone().expand(3, 3, 3), e -> BlockStand.isArmorStand(e, uuid));
         nearbyEntities.forEach(Entity::remove);
     }
+
 }

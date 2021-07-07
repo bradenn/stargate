@@ -18,6 +18,7 @@ public interface Persistent {
 
     void destroy();
 
+
     Document getDocument();
 
     default String getIdentifier() {
@@ -33,6 +34,15 @@ public interface Persistent {
             collection.insertOne(getDocument());
         } else {
             collection.findOneAndReplace(uuidDocument, getDocument());
+        }
+    }
+
+    default void terminate() {
+        MongoCollection<Document> collection = Database.getCollection(getIdentifier());
+        Document uuidDocument = new Document("uuid", getUUID().toString());
+        if (Objects.nonNull(collection.find(uuidDocument).first())) {
+            destroy();
+            collection.findOneAndDelete(uuidDocument);
         }
     }
 

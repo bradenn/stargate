@@ -1,9 +1,10 @@
 package com.bradenn.stargates.commands;
 
+import com.bradenn.stargates.Main;
 import com.bradenn.stargates.cosmetics.Messages;
-import com.bradenn.stargates.structures.Dialer;
-import com.bradenn.stargates.structures.Stargate;
-import com.bradenn.stargates.structures.StructureFactory;
+import com.bradenn.stargates.structures.StructureManager;
+import com.bradenn.stargates.structures.dialer.Dialer;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.entity.Player;
 
 public class CreateCommand implements SubCommand {
@@ -20,10 +21,10 @@ public class CreateCommand implements SubCommand {
         if (args.length >= 2) {
             String name = args[1];
 
-            Stargate stargate = (Stargate) StructureFactory.createStructure(StructureFactory.StructureType.STARGATE, name, player.getLocation());
+            Stargate stargate = StructureManager.createStructure(name, player.getLocation(), Stargate.class);
             stargate.save();
 
-            Dialer dialer = (Dialer) StructureFactory.createStructure(StructureFactory.StructureType.DIALER, name, player.getLocation());
+            Dialer dialer = StructureManager.createStructure(name, player.getLocation(), Dialer.class);
             dialer.assignStargate(stargate.getUUID());
             dialer.save();
 

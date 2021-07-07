@@ -1,9 +1,11 @@
 package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
-import com.bradenn.stargates.structures.Dialer;
-import com.bradenn.stargates.structures.Rings;
-import com.bradenn.stargates.structures.Stargate;
+import com.bradenn.stargates.structures.Structure;
+import com.bradenn.stargates.structures.StructureManager;
+import com.bradenn.stargates.structures.dialer.Dialer;
+import com.bradenn.stargates.structures.rings.Rings;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -19,15 +21,6 @@ public class RebuildCommand implements SubCommand {
     }
 
     public void run(Player player, String[] args) throws Exception {
-        List<Stargate> stargates = Stargate.getAll();
-        stargates.forEach(Stargate::rebuild);
-
-        List<Dialer> dialers = Dialer.getAll();
-        dialers.forEach(Dialer::rebuild);
-
-        List<Rings> rings = Rings.getAll();
-        rings.forEach(Rings::rebuild);
-
-        Messages.sendInfo(player, "Rebuilt %d stargates, %d dialers, and %d rings.", stargates.size(), dialers.size(), rings.size());
+        StructureManager.rebuildAll();
     }
 }

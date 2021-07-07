@@ -1,7 +1,8 @@
 package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
-import com.bradenn.stargates.structures.Stargate;
+import com.bradenn.stargates.structures.StructureManager;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.entity.Player;
 
 public class PurgeCommand implements SubCommand {
@@ -16,9 +17,8 @@ public class PurgeCommand implements SubCommand {
 
     public void run(Player player, String[] args) throws Exception {
         if (args.length >= 1) {
-            int stargateCount = Stargate.getAll().size();
-            Stargate.terminateAll();
-            Messages.sendInfo(player, "%d stargates have been destroyed.", stargateCount);
+            StructureManager.removeAll();
+            Messages.sendInfo(player, "All structures have been permanently destroyed.");
         } else {
             throw new Exception("Insufficient arguments.");
         }

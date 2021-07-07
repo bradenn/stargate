@@ -1,8 +1,11 @@
-package com.bradenn.stargates.structures;
+package com.bradenn.stargates.structures.stargate;
 
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
+import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
+import com.bradenn.stargates.structures.*;
+import com.bradenn.stargates.structures.dialer.Dialer;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Updates;
 import org.apache.commons.lang.RandomStringUtils;
@@ -12,7 +15,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.BoundingBox;
-import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -98,24 +100,6 @@ public class Stargate extends Structure implements Port {
     }
 
     /* Getter functions */
-
-    /**
-     * Rebuild all of the stargates.
-     */
-    public static void rebuildAll() {
-        Database.getCollection("stargates").find().forEach((Consumer<? super Document>) stargate -> new Stargate(stargate).rebuild());
-    }
-
-    /**
-     * Destroy all of the stargate structures and remove them from the database.
-     */
-    public static void terminateAll() {
-        Database.getCollection("stargates").find().forEach((Consumer<? super Document>) stargate -> {
-            Stargate stargateRef = new Stargate(stargate);
-            stargateRef.terminate();
-        });
-    }
-
     /**
      * Serialize the stargate object into a database document.
      */
@@ -280,20 +264,10 @@ public class Stargate extends Structure implements Port {
         if (!getLocation().getChunk().isLoaded()) return;
         Vector v = getOrientation().translate(4, 4, 1);
         Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(BoundingBox.of(getLocation().clone().add(0, 2.5, 0), v.getX(), v.getY(), v.getZ()), e -> BlockStand.isArmorStand(e, uuid));
-        Bukkit.broadcastMessage(nearbyEntities.size() + " stargate armor stands removed... !");
+
         nearbyEntities.forEach(Entity::remove);
     }
 
-    /**
-     * Destroy the stargate structure and remove it from the database.
-     */
-    public void terminate() {
-        this.destroy();
-        Database.getCollection("stargates").findOneAndDelete(new Document("uuid", getUUID().toString()));
-        Document dialer = Database.getCollection("dialers").findOneAndDelete(new Document("stargateUUID", getUUID().toString()));
-        assert dialer != null;
-        new Dialer(dialer).destroy();
-    }
 
 
 }

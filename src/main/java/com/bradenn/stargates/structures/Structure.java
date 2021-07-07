@@ -14,13 +14,11 @@ public abstract class Structure implements Persistent {
     private final Location location;
     private final BoundingBox boundingBox;
     private final Orientation orientation;
-    private final StructureMeta structureMeta;
     private final String name;
 
     @SuppressWarnings("unchecked")
     public Structure(Document document) {
         this.name = document.getString("name");
-        this.structureMeta = null;
         this.world = Bukkit.getWorld(document.getString("world"));
         this.location = Location.deserialize((Map<String, Object>) document.get("location"));
         this.boundingBox = BoundingBox.deserialize((Map<String, Object>) document.get("bounds"));
@@ -33,11 +31,6 @@ public abstract class Structure implements Persistent {
         this.boundingBox = boundingBox;
         this.orientation = orientation;
         this.name = name;
-        this.structureMeta = null;
-    }
-
-    public StructureMeta getStructureMeta() {
-        return structureMeta;
     }
 
     public String getName() {
@@ -50,9 +43,7 @@ public abstract class Structure implements Persistent {
         document.append("location", getLocation().serialize());
         document.append("bounds", getBoundingBox().serialize());
         document.append("orientation", getOrientation().serialize());
-        document.append("structureMeta", getStructureMeta());
         document.append("name", getName());
-        document.append("uuid", getUUID().toString());
         return document;
     }
 

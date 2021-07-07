@@ -1,8 +1,8 @@
 package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
-import com.bradenn.stargates.structures.Rings;
-import com.bradenn.stargates.structures.StructureFactory;
+import com.bradenn.stargates.structures.StructureManager;
+import com.bradenn.stargates.structures.rings.Rings;
 import org.bukkit.entity.Player;
 
 public class RingsCommand implements SubCommand {
@@ -19,7 +19,7 @@ public class RingsCommand implements SubCommand {
         if (args.length >= 2) {
             String name = args[1];
 
-            Rings rings = (Rings) StructureFactory.createStructure(StructureFactory.StructureType.RINGS, name, player.getLocation());
+            Rings rings = StructureManager.createStructure(name, player.getLocation(), Rings.class);
             rings.save();
 
             Messages.sendInfo(player, "A new ring teleporter named '%s' has been created.", rings.getName());

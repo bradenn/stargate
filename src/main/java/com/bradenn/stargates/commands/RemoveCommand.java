@@ -1,7 +1,7 @@
 package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
-import com.bradenn.stargates.structures.Stargate;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;

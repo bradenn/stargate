@@ -1,7 +1,7 @@
 package com.bradenn.stargates.inventory;
 
 import com.bradenn.stargates.cosmetics.StringUtils;
-import com.bradenn.stargates.structures.Stargate;
+import com.bradenn.stargates.structures.stargate.Stargate;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
