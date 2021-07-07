@@ -2,7 +2,7 @@ package com.bradenn.stargates.structures.dialer;
 
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
-import com.bradenn.stargates.structures.Interactive;
+import com.bradenn.stargates.inventory.StargateMenu;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.StargateModel;
 import com.bradenn.stargates.structures.Structure;
@@ -13,13 +13,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.EulerAngle;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Dialer extends Structure implements Interactive {
+public class Dialer extends Structure {
 
     private final StargateModel model;
     private final String name;
@@ -65,6 +66,7 @@ public class Dialer extends Structure implements Interactive {
         Database.getCollection("dialers").find().map(Dialer::new).forEach((Consumer<? super Dialer>) dialers::add);
         return dialers;
     }
+
     /**
      * Get a dialer object from its UUID.
      */
@@ -144,7 +146,7 @@ public class Dialer extends Structure implements Interactive {
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
 
         double outer = 8;
-        BlockStand baseRing = new BlockStand(uuid, world);
+        BlockStand baseRing = new BlockStand(this, world);
 
         for (int i = 0; i < outer; i++) {
 
@@ -179,12 +181,12 @@ public class Dialer extends Structure implements Interactive {
      * Build the MK2 dialer.
      */
     public void buildMk2() {
-        double yOffset = 0;
+        double yOffset = 1.625;
         World world = getWorld();
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
 
         double outer = 8;
-        BlockStand baseRing = new BlockStand(uuid, world);
+        BlockStand baseRing = new BlockStand(this, world);
 
 
         for (int i = 0; i < outer; i++) {
@@ -202,18 +204,18 @@ public class Dialer extends Structure implements Interactive {
             Location outerLocation = centerLocation.clone().add(getOrientation().translate(baseX, y, baseY));
             baseRing.setRotation((float) Math.toDegrees(baseAngle), 0);
             baseRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
-            baseRing.largeBlockAt(outerLocation, new EulerAngle(0, 0, 0));
+            baseRing.smallBlockAt(outerLocation, new EulerAngle(0, 0, 0));
 
         }
 
         baseRing.setMaterial(Material.POLISHED_DEEPSLATE);
-        baseRing.largeBlockAt(centerLocation.clone().add(getOrientation().translate(0, -0.25, 0)), new EulerAngle(0, 0, 0));
+        baseRing.smallBlockAt(centerLocation.clone().add(getOrientation().translate(0, -0.25, 0)), new EulerAngle(0, 0, 0));
 
         baseRing.setMaterial(Material.POLISHED_DEEPSLATE);
-        baseRing.largeBlockAt(centerLocation.clone().add(0, -1 + 0.125, 0), new EulerAngle(0, 0, 0));
+        baseRing.smallBlockAt(centerLocation.clone().add(0, -1 + 0.125, 0), new EulerAngle(0, 0, 0));
 
         baseRing.setMaterial(Material.DARK_PRISMARINE_SLAB);
-        baseRing.largeBlockAt(centerLocation.clone().add(0.125 / 2, 0.25 - 0.13, -0.125 / 2), new EulerAngle(Math.PI / 2, 0, Math.PI / 4));
+        baseRing.smallBlockAt(centerLocation.clone().add(0.125 / 2, 0.25 - 0.13, -0.125 / 2), new EulerAngle(Math.PI / 2, 0, Math.PI / 4));
     }
 
     /**
@@ -224,4 +226,9 @@ public class Dialer extends Structure implements Interactive {
         nearbyEntities.forEach(Entity::remove);
     }
 
+    @Override
+    public void onInteract(Player player) {
+        StargateMenu stargateMenu = new StargateMenu(getStargate());
+        stargateMenu.showMenu(player);
+    }
 }

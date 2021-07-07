@@ -1,7 +1,12 @@
 package com.bradenn.stargates.structures;
 
-import org.bson.Document;
+import org.bukkit.entity.Player;
 
-public interface Interactive{
+public interface Interactive {
+
+
+    default void onInteract(Player player) {
+    }
+
 
 }

@@ -1,15 +1,10 @@
 package com.bradenn.stargates;
 
-import com.bradenn.stargates.cosmetics.Messages;
+import com.bradenn.stargates.inventory.StargateMenu;
 import com.bradenn.stargates.runtime.Orchestrator;
-import com.bradenn.stargates.runtime.Wormhole;
-import com.bradenn.stargates.structures.dialer.Dialer;
-import com.bradenn.stargates.structures.dialer.DialerInventory;
+import com.bradenn.stargates.structures.Structure;
+import com.bradenn.stargates.structures.StructureManager;
 import com.bradenn.stargates.structures.stargate.Stargate;
-import com.bradenn.stargates.structures.StargateModel;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -43,9 +38,10 @@ public class StargateListener implements Listener {
 
     @EventHandler
     public void inventoryEvent(InventoryClickEvent e) {
-        if (!(e.getInventory().getHolder() instanceof DialerInventory)) return;
+        if (!(e.getInventory().getHolder() instanceof StargateMenu)) return;
 
-        DialerInventory dialerInventory = (DialerInventory) e.getInventory().getHolder();
+        StargateMenu menu = (StargateMenu) e.getInventory().getHolder();
+        menu.onClick(e);
 
         ItemStack itemStack = e.getCurrentItem();
         if (Objects.isNull(itemStack)) return;
@@ -57,22 +53,22 @@ public class StargateListener implements Listener {
         if (Objects.isNull(itemLore)) return;
 
 
-        try {
-            if (itemStack.containsEnchantment(Enchantment.ARROW_INFINITE))
-                throw new Exception("A Stargate MK2 is required to establish a multi-dimensional wormhole.");
-
-
-            String targetAddress = itemLore.get(0).replace(ChatColor.GRAY + "Address: ", "");
-
-            Stargate sourceStargate = dialerInventory.getStargate();
-            Stargate targetStargate = Stargate.fromAddress(ChatColor.stripColor(targetAddress));
-
-
-            Wormhole staticWormhole = new Wormhole(sourceStargate, targetStargate, 200);
-            Orchestrator.addWormhole(staticWormhole);
-        } catch (Exception exp) {
-            Messages.sendError((Player) e.getWhoClicked(), exp.getMessage());
-        }
+//        try {
+//            if (itemStack.containsEnchantment(Enchantment.ARROW_INFINITE))
+//                throw new Exception("A Stargate MK2 is required to establish a multi-dimensional wormhole.");
+//
+//
+//            String targetAddress = itemLore.get(0).replace(ChatColor.GRAY + "Address: ", "");
+//
+//            Stargate sourceStargate = dialerInventory.getStargate();
+//            Stargate targetStargate = Stargate.fromAddress(ChatColor.stripColor(targetAddress));
+//
+//
+//            Wormhole staticWormhole = new Wormhole(sourceStargate, targetStargate, 200);
+//            Orchestrator.addWormhole(staticWormhole);
+//        } catch (Exception exp) {
+//            Messages.sendError((Player) e.getWhoClicked(), exp.getMessage());
+//        }
 
         e.setCancelled(true);
 
@@ -86,23 +82,28 @@ public class StargateListener implements Listener {
     }
 
     @EventHandler
+    @SuppressWarnings("unchecked")
     public void entityInteract(PlayerInteractAtEntityEvent e) throws Exception {
         Entity entity = e.getRightClicked();
+
         if (entity instanceof ArmorStand) {
             ArmorStand armorStand = (ArmorStand) entity;
-            String customName = armorStand.getCustomName();
-            if (Objects.isNull(customName)) return;
-            UUID uuid = UUID.fromString(customName);
-            Dialer dialer = Dialer.fromUUID(uuid);
-            assert dialer != null;
-            DialerInventory dialerInventory = new DialerInventory(dialer.getStargate().getUUID());
-            if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.NETHER_STAR)) {
 
-                dialer.getStargate().setModel(StargateModel.MK2);
-            } else {
+            if (armorStand.getMetadata("structure").isEmpty()) return;
+            if (armorStand.getMetadata("class").isEmpty()) return;
 
-                dialerInventory.openInventory(e.getPlayer());
-            }
+            Class<? extends Structure> structure = (Class<? extends Structure>) armorStand.getMetadata("class").get(0).value();
+
+            Structure s = StructureManager.getStructureFromUUID(UUID.fromString(armorStand.getMetadata("structure").get(0).asString()), structure);
+            s.onInteract(e.getPlayer());
+
+//            if (e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.NETHER_STAR)) {
+//
+//                dialer.getStargate().setModel(StargateModel.MK2);
+//            } else {
+//
+//                dialerInventory.openInventory(e.getPlayer());
+//            }
         }
     }
 

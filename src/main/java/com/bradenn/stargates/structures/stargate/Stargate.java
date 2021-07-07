@@ -2,15 +2,20 @@ package com.bradenn.stargates.structures.stargate;
 
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
-import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
-import com.bradenn.stargates.structures.*;
+import com.bradenn.stargates.structures.Orientation;
+import com.bradenn.stargates.structures.Port;
+import com.bradenn.stargates.structures.StargateModel;
+import com.bradenn.stargates.structures.Structure;
 import com.bradenn.stargates.structures.dialer.Dialer;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Updates;
 import org.apache.commons.lang.RandomStringUtils;
 import org.bson.Document;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -21,8 +26,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class Stargate extends Structure implements Port {
-
-    /* Private variables */
 
     private final StargateModel model;
     private final UUID uuid;
@@ -42,8 +45,6 @@ public class Stargate extends Structure implements Port {
         this.address = document.getString("address");
         this.uuid = UUID.fromString(document.getString("uuid"));
     }
-
-    /* Initialization functions */
 
     /**
      * Create a new stargate.
@@ -99,7 +100,6 @@ public class Stargate extends Structure implements Port {
         return stargates;
     }
 
-    /* Getter functions */
     /**
      * Serialize the stargate object into a database document.
      */
@@ -113,33 +113,12 @@ public class Stargate extends Structure implements Port {
         return document;
     }
 
-    public String getIdentifier() {
-        return "stargates";
-    }
-
-    /* Macro Getter functions */
-
     public UUID getUUID() {
         return uuid;
     }
 
-    public BoundingBox getTriggerArea() {
-        return getBoundingBox();
-    }
-
-    @Override
-    public void openPort() {
-
-    }
-
-    @Override
-    public void closePort() {
-
-    }
-
-    @Override
-    public void idle() {
-        renderPortal();
+    public String getIdentifier() {
+        return "stargates";
     }
 
     public String getName() {
@@ -154,8 +133,6 @@ public class Stargate extends Structure implements Port {
         return model;
     }
 
-    /* Bulk Static Class Constructors */
-
     public void setModel(StargateModel stargateModel) {
 
         Database.getCollection("stargates").findOneAndUpdate(new Document("uuid", this.getUUID().toString()), Updates.set("model", stargateModel.serialize()));
@@ -169,7 +146,39 @@ public class Stargate extends Structure implements Port {
         stargate.rebuild();
     }
 
-    /* Local functions */
+    // Port
+
+    public BoundingBox getTriggerArea() {
+        return getBoundingBox();
+    }
+
+    public void openPort() {
+
+    }
+
+    public void closePort() {
+
+    }
+
+    public void idle() {
+        renderPortal();
+    }
+
+    /**
+     * Destroy the stargate structure and remove it from the database.
+     */
+    public void summonPlayer(Player player) {
+        Location safeTeleport = getLocation().clone().add(0, 1, 0);
+        safeTeleport.getChunk().load();
+        safeTeleport.setYaw(getOrientation().playerYaw());
+
+        player.teleport(safeTeleport, PlayerTeleportEvent.TeleportCause.PLUGIN);
+        player.setVelocity(getOrientation().translate(0, 0, 0.2));
+    }
+
+    public void departPlayer(Player player) {
+
+    }
 
     /**
      * Draw the particle accretion disk of the stargate.
@@ -214,23 +223,7 @@ public class Stargate extends Structure implements Port {
 //        }
     }
 
-    /* Structure functions */
-
-    /**
-     * Destroy the stargate structure and remove it from the database.
-     */
-    public void summonPlayer(Player player) {
-        Location safeTeleport = getLocation().clone().add(0, 1, 0);
-        safeTeleport.getChunk().load();
-        safeTeleport.setYaw(getOrientation().playerYaw());
-
-        player.teleport(safeTeleport, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        player.setVelocity(getOrientation().translate(0, 0, 0.2));
-    }
-
-    public void departPlayer(Player player) {
-
-    }
+    // Structure modifiers
 
     /**
      * Construct the stargate structure.
@@ -241,7 +234,7 @@ public class Stargate extends Structure implements Port {
 
         World world = getWorld();
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
-        BlockStand ring = new BlockStand(uuid, world);
+        BlockStand ring = new BlockStand(this, world);
         ring.setMaterial(Material.DEEPSLATE_TILE_SLAB);
         ring.createRing(centerLocation, 34, new Vector(3.25, 3.25, 0), false, getOrientation());
         ring.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);

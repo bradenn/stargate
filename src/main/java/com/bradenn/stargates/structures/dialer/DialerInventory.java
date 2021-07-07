@@ -4,6 +4,7 @@ import com.bradenn.stargates.inventory.DestinationItem;
 import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -29,6 +30,10 @@ public class DialerInventory implements InventoryHolder {
         this.stargateUUID = stargateUUID;
 
         Stargate.getAll().forEach(this::addDestination);
+    }
+
+    public void onClick(InventoryClickEvent e) {
+
     }
 
     public Stargate getStargate() {

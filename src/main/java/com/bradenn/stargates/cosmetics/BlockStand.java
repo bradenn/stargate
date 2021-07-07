@@ -1,6 +1,8 @@
 package com.bradenn.stargates.cosmetics;
 
+import com.bradenn.stargates.Main;
 import com.bradenn.stargates.structures.Orientation;
+import com.bradenn.stargates.structures.Structure;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -9,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
@@ -21,10 +24,12 @@ public class BlockStand {
     private final UUID uuid;
     private Material material;
     private EulerAngle angle;
+    private final Class<? extends Structure> structure;
     private float yaw = 0, pitch = 0;
 
-    public BlockStand(UUID uuid, World world) {
-        this.uuid = uuid;
+    public BlockStand(Structure structure, World world) {
+        this.uuid = structure.getUUID();
+        this.structure = structure.getClass();
         this.world = world;
     }
 
@@ -69,7 +74,7 @@ public class BlockStand {
             double dx = Math.cos(unit * i) * size.getX();
             double dy = Math.sin(unit * i) * size.getY();
 
-            smallBlockAt(center.clone().add(orientation.translate(dx, dy, i*5E-4)), orientation.translateAngle(0, 0, unit * i + Math.PI/2));
+            smallBlockAt(center.clone().add(orientation.translate(dx, dy, i * 5E-4)), orientation.translateAngle(0, 0, -unit * i + Math.PI / 2));
         }
     }
 
@@ -81,11 +86,14 @@ public class BlockStand {
 
         ItemStack itemStack = new ItemStack(material);
 
+
         entityEquipment.setHelmet(itemStack);
         armorStand.setHeadPose(angle);
         armorStand.setRotation(yaw, pitch);
 
         armorStand.setCustomName(uuid.toString());
+        armorStand.setMetadata("structure", new FixedMetadataValue(Main.plugin, uuid.toString()));
+        armorStand.setMetadata("class", new FixedMetadataValue(Main.plugin, structure));
         armorStand.setVisible(false);
         armorStand.setGravity(false);
         armorStand.setBasePlate(false);

@@ -5,13 +5,14 @@ import com.bradenn.stargates.animations.Animation;
 import com.bradenn.stargates.cosmetics.BlockStand;
 import com.bradenn.stargates.cosmetics.DynamicStructure;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
-import com.bradenn.stargates.structures.dialer.Dialer;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Port;
 import com.bradenn.stargates.structures.Structure;
-import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -54,18 +55,6 @@ public class Rings extends Structure implements Port {
         save();
     }
 
-    /**
-     * Construct a Stargate from its database record.
-     *
-     * @param uuid Stargate uuid
-     * @return Stargate object
-     */
-    public static Rings fromUUID(UUID uuid) {
-        MongoCollection<Document> stargates = Database.getCollection("rings");
-        Document match = stargates.find(new Document("uuid", uuid.toString())).first();
-        if (Objects.isNull(match)) return null;
-        return new Rings(match);
-    }
 
     /**
      * Get all stargate objects.
@@ -196,7 +185,7 @@ public class Rings extends Structure implements Port {
         World world = getWorld();
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
 
-        BlockStand innerRing = new BlockStand(uuid, world);
+        BlockStand innerRing = new BlockStand(this, world);
 
         Location innerLocation = centerLocation.getBlock().getLocation().add(0.5, 2 + 0.3125 / 2, 0.5);
         innerRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);

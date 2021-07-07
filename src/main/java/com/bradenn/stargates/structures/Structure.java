@@ -8,7 +8,7 @@ import org.bukkit.util.BoundingBox;
 
 import java.util.Map;
 
-public abstract class Structure implements Persistent {
+public abstract class Structure implements Persistent, Interactive {
 
     private final World world;
     private final Location location;

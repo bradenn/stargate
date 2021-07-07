@@ -11,10 +11,7 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class StructureManager {
@@ -34,6 +31,12 @@ public class StructureManager {
         Location baseOffset = type.getOffset(base, orientation);
         BoundingBox bounds = type.getBounds(base, orientation);
         return structure.getDeclaredConstructor(String.class, Location.class, BoundingBox.class, Orientation.class).newInstance(name, baseOffset, bounds, orientation);
+    }
+
+    public static <T extends Structure> T getStructureFromUUID(UUID uuid, Class<T> structure) throws Exception {
+        MongoCollection<Document> collection = structureMap.get(structure);
+        Document queryDocument = collection.find(new Document("uuid", uuid.toString())).first();
+        return structure.getConstructor(Document.class).newInstance(queryDocument);
     }
 
     private static StructureType matchClass(Class<? extends Structure> structure) {
