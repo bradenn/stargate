@@ -2,7 +2,6 @@ package com.bradenn.stargates.structures.dialer;
 
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.cosmetics.BlockStand;
-import com.bradenn.stargates.inventory.StargateMenu;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.StargateModel;
 import com.bradenn.stargates.structures.Structure;
@@ -141,7 +140,7 @@ public class Dialer extends Structure {
      * Build the MK1 dialer.
      */
     public void buildMk1() {
-        double yOffset = 0;
+        double yOffset = 1.625;
         World world = getWorld();
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
 
@@ -163,18 +162,18 @@ public class Dialer extends Structure {
             Location outerLocation = centerLocation.clone().add(baseX, y, baseY);
             baseRing.setRotation((float) Math.toDegrees(baseAngle), 0);
             baseRing.setMaterial(Material.DEEPSLATE_TILE_SLAB);
-            baseRing.largeBlockAt(outerLocation, new EulerAngle(0, 0, 0));
+            baseRing.smallBlockAt(outerLocation, new EulerAngle(0, 0, 0));
 
         }
 
         baseRing.setMaterial(Material.POLISHED_DEEPSLATE);
-        baseRing.largeBlockAt(centerLocation.clone().add(0, -0.25, 0), new EulerAngle(0, 0, 0));
+        baseRing.smallBlockAt(centerLocation.clone().add(0, -0.25, 0), new EulerAngle(0, 0, 0));
 
         baseRing.setMaterial(Material.POLISHED_DEEPSLATE);
-        baseRing.largeBlockAt(centerLocation.clone().add(0, -1 + 0.125, 0), new EulerAngle(0, 0, 0));
+        baseRing.smallBlockAt(centerLocation.clone().add(0, -1 + 0.125, 0), new EulerAngle(0, 0, 0));
 
         baseRing.setMaterial(Material.LIGHTNING_ROD);
-        baseRing.largeBlockAt(centerLocation.clone().add(0.25, 0.5, 0.25), new EulerAngle(Math.PI, 0, 0));
+        baseRing.smallBlockAt(centerLocation.clone().add(0.25, 0.5, 0.25), new EulerAngle(Math.PI, 0, 0));
     }
 
     /**
@@ -228,7 +227,7 @@ public class Dialer extends Structure {
 
     @Override
     public void onInteract(Player player) {
-        StargateMenu stargateMenu = new StargateMenu(getStargate());
-        stargateMenu.showMenu(player);
+        DialerMenu dialerMenu = new DialerMenu(getStargate());
+        dialerMenu.showMenu(player);
     }
 }

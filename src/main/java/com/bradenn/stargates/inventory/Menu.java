@@ -11,19 +11,32 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class Menu implements InventoryHolder {
 
-    protected Inventory inventory;
     private final InventoryType inventoryType;
+    private final int slots;
     private final String title;
+    protected Inventory inventory;
 
     public Menu(String title, InventoryType inventoryType) {
         this.inventoryType = inventoryType;
         this.title = title;
+        this.slots = 0;
     }
 
-    abstract void onClick(InventoryClickEvent e);
+    public Menu(String title, int slots) {
+        this.inventoryType = null;
+        this.slots = slots;
+        this.title = title;
+    }
+
+    public abstract void onClick(InventoryClickEvent e);
 
     public void generateInventory(InventoryHolder inventoryHolder) {
-        this.inventory = Bukkit.createInventory(inventoryHolder, inventoryType, StringUtils.format(title));
+        if (this.inventoryType == null) {
+            this.inventory = Bukkit.createInventory(inventoryHolder, slots, StringUtils.format(title));
+        } else {
+            this.inventory = Bukkit.createInventory(inventoryHolder, inventoryType, StringUtils.format(title));
+
+        }
     }
 
     @NotNull

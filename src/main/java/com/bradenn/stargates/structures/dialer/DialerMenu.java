@@ -1,6 +1,8 @@
-package com.bradenn.stargates.inventory;
+package com.bradenn.stargates.structures.dialer;
 
 import com.bradenn.stargates.cosmetics.Messages;
+import com.bradenn.stargates.inventory.DestinationItem;
+import com.bradenn.stargates.inventory.Menu;
 import com.bradenn.stargates.runtime.Orchestrator;
 import com.bradenn.stargates.runtime.Wormhole;
 import com.bradenn.stargates.structures.stargate.Stargate;
@@ -14,13 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class StargateMenu extends Menu {
+public class DialerMenu extends Menu {
 
     private final Map<ItemMeta, Stargate> destinations;
     private final Stargate stargate;
 
-    public StargateMenu(Stargate stargate) {
-        super("Stargate", InventoryType.BARREL);
+    public DialerMenu(Stargate stargate) {
+        super(String.format("Stargate: %s", stargate.getName()), InventoryType.BARREL);
         this.stargate = stargate;
         this.destinations = new HashMap<>();
         generateInventory(this);
@@ -39,7 +41,7 @@ public class StargateMenu extends Menu {
     public void onClick(InventoryClickEvent e) {
         try {
             if (!destinations.containsKey(Objects.requireNonNull(e.getCurrentItem()).getItemMeta())) {
-                throw new Exception("Unknown item in the bagging area");
+                throw new Exception("There is an unknown item in the bagging area.");
             }
             Wormhole wormhole = new Wormhole(this.stargate, destinations.get(e.getCurrentItem().getItemMeta()), 200);
             Orchestrator.addWormhole(wormhole);
