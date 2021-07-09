@@ -91,7 +91,7 @@ public enum Orientation implements ConfigurationSerializable {
     }
 
     public EulerAngle translateAngle(double x, double y, double z) {
-        Vector v = translate(x, y, z);
+        Vector v = rotateSpin(x, y, z);
         return new EulerAngle(v.getX(), v.getY(), v.getZ());
     }
 
@@ -100,11 +100,11 @@ public enum Orientation implements ConfigurationSerializable {
             case NORTH:
                 return new Vector(x, y, z);
             case SOUTH:
-                return new Vector(x, y, z);
+                return new Vector(x, y, -z);
             case WEST:
-                return new Vector(z, y, x);
+                return new Vector(-z, y, x);
             case EAST:
-                return new Vector(z, y, x);
+                return new Vector(z, y, -x);
         }
         return new Vector(0, 0, 0);
     }
