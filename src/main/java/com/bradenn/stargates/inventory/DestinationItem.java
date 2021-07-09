@@ -14,7 +14,6 @@ public class DestinationItem extends Item {
 
     /*
      * Destination Name
-     * Address: ABDH
      * World: Overworld
      * Model: MK2
      */
@@ -27,8 +26,6 @@ public class DestinationItem extends Item {
 
         assert itemMeta != null;
         itemMeta.setDisplayName(ChatColor.WHITE + stargate.getName());
-
-        lore.put("Address", stargate.getAddress());
         
         switch (Objects.requireNonNull(stargate.getWorld()).getEnvironment()) {
             case NORMAL:
