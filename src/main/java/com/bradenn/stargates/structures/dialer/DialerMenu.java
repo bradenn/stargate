@@ -6,6 +6,7 @@ import com.bradenn.stargates.inventory.Menu;
 import com.bradenn.stargates.runtime.Orchestrator;
 import com.bradenn.stargates.runtime.Wormhole;
 import com.bradenn.stargates.structures.stargate.Stargate;
+import com.bradenn.stargates.structures.stargate.StargatePreferences;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -32,6 +33,8 @@ public class DialerMenu extends Menu {
 
     private void addDestination(Stargate stargate) {
         if (stargate.getUUID().equals(this.stargate.getUUID())) return;
+        if (stargate.checkPreference(StargatePreferences.PRIVATE)) return;
+
         ItemStack item = new DestinationItem(stargate);
         destinations.put(item.getItemMeta(), stargate);
         getInventory().addItem(item);
@@ -40,11 +43,10 @@ public class DialerMenu extends Menu {
     @Override
     public void onClick(InventoryClickEvent e) {
         try {
-            if (!destinations.containsKey(Objects.requireNonNull(e.getCurrentItem()).getItemMeta())) {
-                throw new Exception("There is an unknown item in the bagging area.");
+            if (destinations.containsKey(Objects.requireNonNull(e.getCurrentItem()).getItemMeta())) {
+                Wormhole wormhole = new Wormhole(this.stargate, destinations.get(e.getCurrentItem().getItemMeta()), 200);
+                Orchestrator.addWormhole(wormhole);
             }
-            Wormhole wormhole = new Wormhole(this.stargate, destinations.get(e.getCurrentItem().getItemMeta()), 200);
-            Orchestrator.addWormhole(wormhole);
         } catch (Exception exception) {
             Messages.sendError((Player) e.getWhoClicked(), "%s", exception.getMessage());
         }

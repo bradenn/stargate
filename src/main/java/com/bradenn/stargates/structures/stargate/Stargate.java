@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 public class Stargate extends Structure implements Port {
 
     private final StargateModel model;
+    private final Map<String, Boolean> preferences;
     private final UUID uuid;
     private final String name;
     private final String address;
@@ -41,6 +42,7 @@ public class Stargate extends Structure implements Port {
     public Stargate(Document document) {
         super((Document) document.get("structure"));
         this.name = document.getString("name");
+        this.preferences = (Map<String, Boolean>) document.get("preferences");
         this.model = StargateModel.deserialize((Map<String, Object>) document.get("model"));
         this.address = document.getString("address");
         this.uuid = UUID.fromString(document.getString("uuid"));
@@ -57,6 +59,10 @@ public class Stargate extends Structure implements Port {
         super(name, base, bounds, orientation);
 
         this.name = name;
+        this.preferences = new HashMap<>();
+        for (StargatePreferences stargatePreferences : StargatePreferences.values()) {
+            preferences.put(stargatePreferences.toString(), stargatePreferences.enabled);
+        }
         this.model = StargateModel.MK1;
         this.address = RandomStringUtils.randomAlphanumeric(4).toUpperCase();
         this.uuid = UUID.randomUUID();
@@ -106,6 +112,7 @@ public class Stargate extends Structure implements Port {
     public Document getDocument() {
         Document document = new Document();
         document.put("name", name);
+        document.put("preferences", preferences);
         document.put("model", model.serialize());
         document.put("address", address);
         document.put("uuid", uuid.toString());
@@ -127,6 +134,19 @@ public class Stargate extends Structure implements Port {
 
     public String getAddress() {
         return address;
+    }
+
+    public Map<String, Boolean> getPreferences() {
+        return preferences;
+    }
+
+    public boolean checkPreference(StargatePreferences stargatePreferences) {
+        return preferences.get(stargatePreferences.toString());
+    }
+
+    public void setPreference(String key, boolean value) {
+        preferences.put(key, value);
+        save();
     }
 
     public StargateModel getModel() {

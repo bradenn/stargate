@@ -1,6 +1,5 @@
 package com.bradenn.stargates.commands;
 
-import com.bradenn.stargates.Main;
 import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.structures.StructureManager;
 import com.bradenn.stargates.structures.dialer.Dialer;
@@ -18,7 +17,9 @@ public class CreateCommand implements SubCommand {
     }
 
     public void run(Player player, String[] args) throws Exception {
-        if (args.length >= 2) {
+        if (args.length == 1) {
+            throw new Exception("Insufficient arguments.");
+        } else if (args.length == 2) {
             String name = args[1];
 
             Stargate stargate = StructureManager.createStructure(name, player.getLocation(), Stargate.class);
@@ -30,7 +31,7 @@ public class CreateCommand implements SubCommand {
 
             Messages.sendInfo(player, "A stargate named '%s' has been created.", stargate.getName());
         } else {
-            throw new Exception("Insufficient arguments.");
+            throw new Exception("Excessive arguments.");
         }
     }
 }
