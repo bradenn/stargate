@@ -5,9 +5,8 @@ import com.bradenn.stargates.cosmetics.BlockStand;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Port;
-import com.bradenn.stargates.structures.StargateModel;
 import com.bradenn.stargates.structures.Structure;
-import com.bradenn.stargates.structures.dialer.Dialer;
+import com.bradenn.stargates.structures.dialer.DialerMenu;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Updates;
 import org.apache.commons.lang.RandomStringUtils;
@@ -156,11 +155,7 @@ public class Stargate extends Structure implements Port {
     public void setModel(StargateModel stargateModel) {
 
         Database.getCollection("stargates").findOneAndUpdate(new Document("uuid", this.getUUID().toString()), Updates.set("model", stargateModel.serialize()));
-        Database.getCollection("dialers").findOneAndUpdate(new Document("stargateUUID", this.getUUID().toString()), Updates.set("model", stargateModel.serialize()));
 
-        Dialer dialer = Dialer.fromStargate(getUUID());
-        assert dialer != null;
-        dialer.rebuild();
         Stargate stargate = Stargate.fromUUID(getUUID());
         assert stargate != null;
         stargate.rebuild();
@@ -208,17 +203,24 @@ public class Stargate extends Structure implements Port {
         World world = center.getWorld();
         if (Objects.isNull(world)) return;
 
-        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.BLUE.getColor(), 2);
-        for (double j = 0; j < 3; j += 0.2) {
-            double particleCount = 4 * j;
-            for (double i = 0; i < particleCount; i += 0.2) {
-                double delta = (Math.PI * 2) / particleCount;
-                double posX = Math.cos(delta * i) * j;
-                double posY = Math.sin(delta * i) * j;
-                Vector adjusted = getOrientation().translate(posX, posY, 0);
-                world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, blueDust);
-            }
+        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.BLUE.getColor(), 3);
+        for (double t = 0; t < 14 * Math.PI - (Math.PI / 2); t += (Math.PI / 16)) {
+            double r = t / 16;
+            double posX = Math.cos(t) * r;
+            double posY = Math.sin(t) * r;
+            Vector adjusted = getOrientation().translate(posX, posY, 0);
+            world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, blueDust);
         }
+//        for (double j = 0; j < 3; j += 0.2) {
+//            double particleCount = 4 * j;
+//            for (double i = 0; i < particleCount; i += 0.2) {
+//                double delta = (Math.PI * 2) / particleCount;
+//                double posX = Math.cos(delta * i) * j;
+//                double posY = Math.sin(delta * i) * j;
+//                Vector adjusted = getOrientation().translate(posX, posY, 0);
+//                world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, blueDust);
+//            }
+//        }
     }
 
     /**
@@ -270,11 +272,19 @@ public class Stargate extends Structure implements Port {
 
     }
 
+    @Override
+    public void rebuild() {
+        if (getLocation().getChunk().isLoaded()) {
+            destroy();
+            build();
+        }
+    }
+
     /**
      * Find and remove all structure-related objects.
      */
     public void destroy() {
-        if (!getLocation().getChunk().isLoaded()) return;
+
         Vector v = getOrientation().translate(4, 4, 1);
         Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(BoundingBox.of(getLocation().clone().add(0, 2.5, 0), v.getX(), v.getY(), v.getZ()), e -> BlockStand.isArmorStand(e, uuid));
 
@@ -283,7 +293,17 @@ public class Stargate extends Structure implements Port {
 
     @Override
     public void onInteract(Player player) {
-        StargateMenu stargateMenu = new StargateMenu(this);
-        stargateMenu.showMenu(player);
+        if (player.isSneaking()) {
+            if (player.getInventory().getItemInMainHand().getType().equals(Material.NETHER_STAR)) {
+                setModel(StargateModel.MK2);
+            } else {
+                StargateMenu stargateMenu = new StargateMenu(this);
+                stargateMenu.showMenu(player);
+            }
+        } else {
+            DialerMenu stargateMenu = new DialerMenu(this);
+            stargateMenu.showMenu(player);
+        }
+
     }
 }

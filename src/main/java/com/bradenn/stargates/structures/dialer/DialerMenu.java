@@ -9,7 +9,6 @@ import com.bradenn.stargates.structures.stargate.Stargate;
 import com.bradenn.stargates.structures.stargate.StargatePreferences;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -23,7 +22,7 @@ public class DialerMenu extends Menu {
     private final Stargate stargate;
 
     public DialerMenu(Stargate stargate) {
-        super(String.format("Stargate: %s", stargate.getName()), InventoryType.BARREL);
+        super(String.format("Stargate: %s", stargate.getName()), 6 * 9);
         this.stargate = stargate;
         this.destinations = new HashMap<>();
         generateInventory(this);
@@ -35,7 +34,7 @@ public class DialerMenu extends Menu {
         if (stargate.getUUID().equals(this.stargate.getUUID())) return;
         if (stargate.checkPreference(StargatePreferences.PRIVATE)) return;
 
-        ItemStack item = new DestinationItem(stargate);
+        ItemStack item = new DestinationItem(this.stargate, stargate);
         destinations.put(item.getItemMeta(), stargate);
         getInventory().addItem(item);
     }

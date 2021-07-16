@@ -54,8 +54,11 @@ public class Wormhole {
         ticks+=1;
         if (ticks <= expiration) {
             progressBar.decrement();
-            to.idle();
-            from.idle();
+            if (ticks % 2 == 0) {
+                to.idle();
+                from.idle();
+            }
+
         } else {
             severConnection();
             return false;

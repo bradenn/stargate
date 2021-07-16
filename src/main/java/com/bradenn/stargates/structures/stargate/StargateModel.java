@@ -1,4 +1,4 @@
-package com.bradenn.stargates.structures;
+package com.bradenn.stargates.structures.stargate;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -7,7 +7,8 @@ import java.util.Map;
 
 public enum StargateModel {
     MK1,
-    MK2;
+    MK2,
+    SEED;
 
     public boolean isMk2() {
         return this.equals(MK2);

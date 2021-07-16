@@ -5,7 +5,7 @@ import org.bukkit.Material;
 
 public enum StargatePreferences {
 
-    //    INCINERATE("Incinerator", Material.FIRE_CHARGE, "Incinerate all incoming travelers.", false),
+    INCINERATE("Incinerator", Material.FIRE_CHARGE, "Incinerate all incoming travelers.", false),
     RETURN_TO_SENDER("Return to Sender", Material.BOW, "Incoming travelers without permission will\nbe sent back to the stargate they came from.", false),
     PRIVATE("Private", Material.IRON_BARS, "When enabled, this stargate will not be\npublic displayed on other dialers.", false);
 

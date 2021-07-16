@@ -1,6 +1,5 @@
 package com.bradenn.stargates.cosmetics;
 
-import com.bradenn.stargates.Main;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Structure;
 import org.bukkit.Location;
@@ -11,7 +10,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
@@ -79,6 +77,28 @@ public class BlockStand {
         }
     }
 
+    public static boolean isGenericArmorStand(Entity entity) {
+        if (entity instanceof ArmorStand) {
+            ArmorStand armorStand = (ArmorStand) entity;
+            String customName = armorStand.getCustomName();
+
+            if (!Objects.isNull(customName)) {
+                return customName.contains(";");
+            }
+        }
+        return false;
+    }
+
+    public static boolean isArmorStand(Entity entity, UUID uuid) {
+        if (entity instanceof ArmorStand) {
+            ArmorStand armorStand = (ArmorStand) entity;
+            if (!Objects.isNull(armorStand.getCustomName())) {
+                return armorStand.getCustomName().contains(uuid.toString());
+            }
+        }
+        return false;
+    }
+
     private void configureSmallArmorStand(Entity entity) {
         ArmorStand armorStand = (ArmorStand) entity;
 
@@ -92,9 +112,9 @@ public class BlockStand {
         armorStand.setHeadPose(angle);
         armorStand.setRotation(yaw, pitch);
 
-        armorStand.setCustomName(uuid.toString());
-        armorStand.setMetadata("structure", new FixedMetadataValue(Main.plugin, uuid.toString()));
-        armorStand.setMetadata("class", new FixedMetadataValue(Main.plugin, structure));
+        String customName = String.format("%s;%s", structure.getName(), uuid.toString());
+        armorStand.setCustomName(customName);
+
         armorStand.setVisible(false);
         armorStand.setGravity(false);
         armorStand.setBasePlate(false);
@@ -116,7 +136,8 @@ public class BlockStand {
         armorStand.setHeadPose(angle);
         armorStand.setRotation(yaw, pitch);
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
-        armorStand.setCustomName(uuid.toString());
+        String customName = String.format("%s;%s", structure.getName(), uuid.toString());
+        armorStand.setCustomName(customName);
         armorStand.setMarker(false);
 
         armorStand.setVisible(false);
@@ -128,16 +149,6 @@ public class BlockStand {
         armorStand.setCollidable(false);
         armorStand.setCanPickupItems(false);
         armorStand.setSilent(true);
-    }
-
-    public static boolean isArmorStand(Entity entity, UUID uuid) {
-        if (entity instanceof ArmorStand) {
-            ArmorStand armorStand = (ArmorStand) entity;
-            if (!Objects.isNull(armorStand.getCustomName())) {
-                return armorStand.getCustomName().equalsIgnoreCase(uuid.toString());
-            }
-        }
-        return false;
     }
 
 

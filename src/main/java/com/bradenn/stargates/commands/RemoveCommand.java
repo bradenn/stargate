@@ -1,10 +1,9 @@
 package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
+import com.bradenn.stargates.structures.StructureManager;
 import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.entity.Player;
-
-import java.util.Objects;
 
 public class RemoveCommand implements SubCommand {
 
@@ -17,12 +16,12 @@ public class RemoveCommand implements SubCommand {
     }
 
     public String getPermission() {
-        return "stargates.remove.all";
+        return "stargates.remove";
     }
 
     public void run(Player player, String[] args) throws Exception {
-        Stargate stargate = Stargate.fromAddress(args[1]);
-        if (Objects.isNull(stargate)) throw new Exception("Invalid stargate address.");
+        Stargate stargate = StructureManager.getStructureFromName(args[1], Stargate.class);
+
         stargate.terminate();
         Messages.sendInfo(player, "The stargate '%s' has been permanently removed.", stargate.getName());
     }

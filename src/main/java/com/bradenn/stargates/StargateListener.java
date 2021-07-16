@@ -1,11 +1,11 @@
 package com.bradenn.stargates;
 
+import com.bradenn.stargates.cosmetics.BlockStand;
 import com.bradenn.stargates.inventory.Menu;
 import com.bradenn.stargates.runtime.Orchestrator;
 import com.bradenn.stargates.structures.Structure;
 import com.bradenn.stargates.structures.StructureManager;
 import com.bradenn.stargates.structures.stargate.Stargate;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -53,20 +53,20 @@ public class StargateListener implements Listener {
     }
 
     @EventHandler
-    @SuppressWarnings("unchecked")
-    public void entityInteract(PlayerInteractAtEntityEvent e) throws Exception {
+    public void entityInteract(PlayerInteractAtEntityEvent e) {
         Entity entity = e.getRightClicked();
 
-        if (entity instanceof ArmorStand) {
-            ArmorStand armorStand = (ArmorStand) entity;
+        if (BlockStand.isGenericArmorStand(entity)) {
+            String identifier = Objects.requireNonNull(entity.getCustomName());
+            String[] args = identifier.split(";");
 
-            if (armorStand.getMetadata("structure").isEmpty()) return;
-            if (armorStand.getMetadata("class").isEmpty()) return;
+            try {
+                Structure s = StructureManager.getStructureFromUUID(UUID.fromString(args[1]), Class.forName(args[0]).asSubclass(Structure.class));
+                s.onInteract(e.getPlayer());
+            } catch (Exception exception) {
+                e.getPlayer().sendMessage(exception.getMessage());
+            }
 
-            Class<? extends Structure> structure = (Class<? extends Structure>) armorStand.getMetadata("class").get(0).value();
-
-            Structure s = StructureManager.getStructureFromUUID(UUID.fromString(armorStand.getMetadata("structure").get(0).asString()), structure);
-            s.onInteract(e.getPlayer());
 
         }
     }

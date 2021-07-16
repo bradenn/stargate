@@ -1,12 +1,13 @@
 package com.bradenn.stargates.structures;
 
 import com.bradenn.stargates.Database;
-import com.bradenn.stargates.structures.dialer.Dialer;
+import com.bradenn.stargates.Main;
 import com.bradenn.stargates.structures.rings.Rings;
 import com.bradenn.stargates.structures.stargate.Stargate;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.bukkit.Location;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
@@ -21,7 +22,6 @@ public class StructureManager {
     public static void init() {
         structureMap = new HashMap<>();
         structureMap.put(Stargate.class, Database.getCollection("stargates"));
-        structureMap.put(Dialer.class, Database.getCollection("dialers"));
         structureMap.put(Rings.class, Database.getCollection("rings"));
     }
 
@@ -36,6 +36,15 @@ public class StructureManager {
     public static <T extends Structure> T getStructureFromUUID(UUID uuid, Class<T> structure) throws Exception {
         MongoCollection<Document> collection = structureMap.get(structure);
         Document queryDocument = collection.find(new Document("uuid", uuid.toString())).first();
+        return structure.getConstructor(Document.class).newInstance(queryDocument);
+    }
+
+    public static <T extends Structure> T getStructureFromName(String name, Class<T> structure) throws Exception {
+        MongoCollection<Document> collection = structureMap.get(structure);
+        Document queryDocument = collection.find(new Document("name", name)).first();
+        if (queryDocument == null) {
+            throw new Exception("Structure could not be found.");
+        }
         return structure.getConstructor(Document.class).newInstance(queryDocument);
     }
 
@@ -56,7 +65,14 @@ public class StructureManager {
     }
 
     private static <T extends Structure> void rebuildAllStructuresByClass(Class<T> structureClass) {
-        getAllStructuresByClass(structureClass).forEach(Structure::rebuild);
+        getAllStructuresByClass(structureClass).forEach(s -> {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    s.rebuild();
+                }
+            }.runTask(Main.plugin);
+        });
     }
 
     private static <T extends Structure> List<T> getAllStructuresByClass(Class<T> structureClass) {

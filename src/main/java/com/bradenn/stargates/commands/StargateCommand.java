@@ -16,14 +16,6 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
 
     private final SubCommand helpCommand = new HelpCommand();
 
-    private void registerSubCommand(SubCommand subCommand) {
-        commands.put(subCommand.getLabel(), subCommand);
-    }
-
-    private SubCommand getSubCommand(String commandLabel) {
-        return commands.getOrDefault(commandLabel, helpCommand);
-    }
-
     public StargateCommand(PluginCommand pluginCommand) {
         if (pluginCommand != null) {
             pluginCommand.setExecutor(this);
@@ -32,11 +24,20 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
 
         registerSubCommand(helpCommand);
         registerSubCommand(new CreateCommand());
+        registerSubCommand(new SeedCommand());
         registerSubCommand(new RemoveCommand());
         registerSubCommand(new PurgeCommand());
         registerSubCommand(new RebuildCommand());
         registerSubCommand(new RingsCommand());
         registerSubCommand(new TestCommand());
+    }
+
+    private void registerSubCommand(SubCommand subCommand) {
+        commands.put(subCommand.getLabel(), subCommand);
+    }
+
+    private SubCommand getSubCommand(String commandLabel) {
+        return commands.getOrDefault(commandLabel, helpCommand);
     }
 
     @Override
@@ -62,7 +63,12 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         if (argsCount >= 1) {
             String commandLabel = args[0];
             SubCommand subCommand = getSubCommand(commandLabel);
-            subCommand.run(player, args);
+
+            if (player.hasPermission(subCommand.getPermission())) {
+                subCommand.run(player, args);
+            } else {
+                throw new Exception("You lack the permissions to use this command.");
+            }
         } else {
             helpCommand.run(player, args);
         }

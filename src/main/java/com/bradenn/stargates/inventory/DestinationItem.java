@@ -4,6 +4,7 @@ import com.bradenn.stargates.cosmetics.StringUtils;
 import com.bradenn.stargates.structures.stargate.Stargate;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -18,19 +19,22 @@ public class DestinationItem extends Item {
      * Model: MK2
      */
 
-    public DestinationItem(Stargate stargate) {
+    public DestinationItem(Stargate from, Stargate to) {
         super();
 
         ItemMeta itemMeta = getItemMeta();
         Map<String, String> lore = new HashMap<>();
 
         assert itemMeta != null;
-        itemMeta.setDisplayName(ChatColor.WHITE + stargate.getName());
-        
-        switch (Objects.requireNonNull(stargate.getWorld()).getEnvironment()) {
+        itemMeta.setDisplayName(ChatColor.WHITE + to.getName());
+
+        switch (Objects.requireNonNull(to.getWorld()).getEnvironment()) {
             case NORMAL:
                 setType(Material.GRASS_BLOCK);
                 lore.put("World", "&aOverworld");
+                if (from.getLocation().getWorld().equals(to.getWorld())) {
+                    lore.put("Distance", (int) to.getLocation().distance(from.getLocation()) + " blocks");
+                }
                 break;
             case NETHER:
                 setType(Material.NETHERRACK);
@@ -46,12 +50,17 @@ public class DestinationItem extends Item {
                 break;
         }
 
-        lore.put("Model", stargate.getModel().name());
+        lore.put("Model", to.getModel().name());
 
         itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        
+
         List<String> loreStrings = new ArrayList<>();
         lore.forEach((k, v) -> loreStrings.add(StringUtils.format("&7%s: %s", k, v)));
+
+        if (!Objects.equals(from.getLocation().getWorld(), to.getWorld())) {
+            itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+            loreStrings.add(StringUtils.format("&cMK2 Stargate required."));
+        }
 
         itemMeta.setLore(loreStrings);
         setItemMeta(itemMeta);
