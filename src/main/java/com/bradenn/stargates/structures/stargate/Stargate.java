@@ -258,16 +258,16 @@ public class Stargate extends Structure implements Port {
         Location centerLocation = getLocation().clone().add(0, yOffset, 0);
         BlockStand ring = new BlockStand(this, world);
         ring.setMaterial(Material.DEEPSLATE_TILE_SLAB);
-        ring.createRing(centerLocation, 34, new Vector(3, 3, 0), false, getOrientation());
+        ring.createRing(centerLocation, 34, new Vector(3, 3, 0), getOrientation());
         ring.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
-        ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.005)), 32, new Vector(2.75, 2.75, 0), false, getOrientation());
+        ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.005)), 32, new Vector(2.75, 2.75, 0), getOrientation());
         if (getModel().equals(StargateModel.MK1)) {
             ring.setMaterial(Material.WAXED_CUT_COPPER_SLAB);
-            ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, 0.025)), 8, new Vector(2.85, 2.85, 0), false, getOrientation());
-            ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.025)), 8, new Vector(2.85, 2.85, 0), false, getOrientation());
+            ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, 0.025)), 8, new Vector(2.85, 2.85, 0), getOrientation());
+            ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.025)), 8, new Vector(2.85, 2.85, 0), getOrientation());
         } else {
             ring.setMaterial(Material.DARK_PRISMARINE_SLAB);
-            ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.0025)), 32, new Vector(2.85, 2.85, 0), false, getOrientation());
+            ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.0025)), 32, new Vector(2.85, 2.85, 0), getOrientation());
         }
 
     }

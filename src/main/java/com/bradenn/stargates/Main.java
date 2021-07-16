@@ -34,7 +34,6 @@ public class Main extends JavaPlugin {
 
         StructureManager.init();
 
-
         orchestrator = new Orchestrator();
         orchestrator.run();
 

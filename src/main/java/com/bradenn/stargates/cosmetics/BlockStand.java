@@ -8,7 +8,6 @@ import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
@@ -40,11 +39,6 @@ public class BlockStand {
         this.pitch = pitch;
     }
 
-    public void largeBlockAt(Location location, EulerAngle angle) {
-        this.angle = angle;
-        world.spawn(location, ArmorStand.class, this::configureArmorStand);
-    }
-
     public void smallBlockAt(Location location, EulerAngle angle) {
         this.angle = angle;
         double xRad = (Math.PI * angle.getX()) / 180;
@@ -52,7 +46,7 @@ public class BlockStand {
         double x = (Math.sin(zRad) * Math.cos(xRad)) * -0.25;
         double y = (Math.cos(xRad) * Math.cos(zRad)) * -0.25;
         double z = Math.sin(xRad) * -0.25;
-        world.spawn(location.clone().add(x, y - 1.4375, z), ArmorStand.class, this::configureSmallArmorStand);
+        world.spawn(location.clone().add(x, y - 1.4375, z), ArmorStand.class, this::configureArmorStand);
     }
 
     public void createRing(Location center, double count, Vector size, boolean offset) {
@@ -66,7 +60,7 @@ public class BlockStand {
         }
     }
 
-    public void createRing(Location center, double count, Vector size, boolean offset, Orientation orientation) {
+    public void createRing(Location center, double count, Vector size, Orientation orientation) {
         double unit = (Math.PI * 2) / count;
         for (double i = 0; i < count; i++) {
             double dx = Math.cos(unit * i - Math.PI / 2) * size.getX();
@@ -99,7 +93,7 @@ public class BlockStand {
         return false;
     }
 
-    private void configureSmallArmorStand(Entity entity) {
+    private void configureArmorStand(Entity entity) {
         ArmorStand armorStand = (ArmorStand) entity;
 
         EntityEquipment entityEquipment = armorStand.getEquipment();
@@ -125,31 +119,5 @@ public class BlockStand {
         armorStand.setCanPickupItems(false);
         armorStand.setSilent(true);
     }
-
-    private void configureArmorStand(Entity entity) {
-        ArmorStand armorStand = (ArmorStand) entity;
-
-        EntityEquipment entityEquipment = armorStand.getEquipment();
-        if (Objects.isNull(entityEquipment)) return;
-
-        entityEquipment.setHelmet(new ItemStack(material));
-        armorStand.setHeadPose(angle);
-        armorStand.setRotation(yaw, pitch);
-        armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
-        String customName = String.format("%s;%s", structure.getName(), uuid.toString());
-        armorStand.setCustomName(customName);
-        armorStand.setMarker(false);
-
-        armorStand.setVisible(false);
-        armorStand.setGravity(false);
-        armorStand.setBasePlate(false);
-        armorStand.setCollidable(false);
-        armorStand.setPersistent(true);
-        armorStand.setInvulnerable(true);
-        armorStand.setCollidable(false);
-        armorStand.setCanPickupItems(false);
-        armorStand.setSilent(true);
-    }
-
 
 }
