@@ -15,8 +15,8 @@ public class RemoveCommand implements SubCommand {
         return "Remove a stargate referenced by address.";
     }
 
-    public String getPermission() {
-        return "stargates.remove";
+    public Permission getPermission() {
+        return Permission.REMOVE;
     }
 
     public void run(Player player, String[] args) throws Exception {

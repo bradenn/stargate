@@ -17,8 +17,8 @@ public class SeedCommand implements SubCommand {
         return "Build and register a stargate.";
     }
 
-    public String getPermission() {
-        return "stargates.seed";
+    public Permission getPermission() {
+        return Permission.SEED;
     }
 
     public void run(Player player, String[] args) throws Exception {

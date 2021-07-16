@@ -30,12 +30,20 @@ public class StructureManager {
         Orientation orientation = Orientation.fromYaw(base.getYaw());
         Location baseOffset = type.getOffset(base, orientation);
         BoundingBox bounds = type.getBounds(base, orientation);
+
+        MongoCollection<Document> collection = structureMap.get(structure);
+        Document queryDocument = collection.find(new Document("name", name)).first();
+        if (queryDocument != null) throw new Exception("A structure with this name already exists.");
+
         return structure.getDeclaredConstructor(String.class, Location.class, BoundingBox.class, Orientation.class).newInstance(name, baseOffset, bounds, orientation);
     }
 
     public static <T extends Structure> T getStructureFromUUID(UUID uuid, Class<T> structure) throws Exception {
         MongoCollection<Document> collection = structureMap.get(structure);
         Document queryDocument = collection.find(new Document("uuid", uuid.toString())).first();
+        if (queryDocument == null) {
+            throw new Exception("Structure could not be found.");
+        }
         return structure.getConstructor(Document.class).newInstance(queryDocument);
     }
 

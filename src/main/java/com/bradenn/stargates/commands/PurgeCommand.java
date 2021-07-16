@@ -2,7 +2,6 @@ package com.bradenn.stargates.commands;
 
 import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.structures.StructureManager;
-import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.entity.Player;
 
 public class PurgeCommand implements SubCommand {
@@ -13,6 +12,10 @@ public class PurgeCommand implements SubCommand {
 
     public String getDescription() {
         return "Destroy all stargates.";
+    }
+
+    public Permission getPermission() {
+        return Permission.PURGE;
     }
 
     public void run(Player player, String[] args) throws Exception {

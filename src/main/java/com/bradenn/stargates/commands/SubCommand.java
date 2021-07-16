@@ -8,8 +8,8 @@ public interface SubCommand {
 
     String getDescription();
 
-    default String getPermission() {
-        return "stargate";
+    default Permission getPermission() {
+        return Permission.DEFAULT;
     }
 
     void run(Player player, String[] args) throws Exception;
