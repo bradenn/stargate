@@ -13,7 +13,6 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public class DynamicStructure {
 
@@ -22,7 +21,7 @@ public class DynamicStructure {
     private EulerAngle angle;
     private Location location;
 
-    private List<ArmorStand> stands;
+    private final List<ArmorStand> stands;
 
     public DynamicStructure(World world, Material material) {
         this.world = world;
@@ -83,10 +82,9 @@ public class DynamicStructure {
         armorStand.setVisible(false);
         armorStand.setGravity(false);
         armorStand.setBasePlate(false);
-        armorStand.setCollidable(false);
+        armorStand.setCollidable(true);
         armorStand.setPersistent(true);
         armorStand.setInvulnerable(true);
-        armorStand.setCollidable(false);
         armorStand.setCanPickupItems(false);
         armorStand.setSilent(true);
         stands.add(armorStand);

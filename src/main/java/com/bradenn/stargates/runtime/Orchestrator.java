@@ -17,7 +17,6 @@ public class Orchestrator {
     public Orchestrator() {
         activeWormholes = new ArrayList<>();
         lockedPorts = new ArrayList<>();
-
     }
 
     public static void lock(UUID uuid) {

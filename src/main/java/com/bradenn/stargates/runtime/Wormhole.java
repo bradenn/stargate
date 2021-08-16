@@ -15,6 +15,8 @@ public class Wormhole {
     public Wormhole(Port from, Port to, long expiration) throws Exception {
         if (from.isLocked()) throw new Exception("This port is already in use.");
         if (to.isLocked()) throw new Exception("Destination port is in use.");
+
+
         this.from = from;
         this.to = to;
         this.expiration = expiration;

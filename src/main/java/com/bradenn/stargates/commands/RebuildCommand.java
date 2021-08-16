@@ -18,6 +18,6 @@ public class RebuildCommand implements SubCommand {
     }
 
     public void run(Player player, String[] args) throws Exception {
-        StructureManager.rebuildAll();
+        StructureManager.rebuildAllVerbose(player);
     }
 }
