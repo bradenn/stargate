@@ -192,7 +192,7 @@ public class Stargate extends Structure implements Port {
 
         if (player.isInsideVehicle()) {
             Entity vehicle = player.getVehicle();
-            vehicle.get
+
             assert vehicle != null;
 
             vehicle.removePassenger(player);
