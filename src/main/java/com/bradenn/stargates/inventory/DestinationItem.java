@@ -2,6 +2,7 @@ package com.bradenn.stargates.inventory;
 
 import com.bradenn.stargates.cosmetics.StringUtils;
 import com.bradenn.stargates.structures.stargate.Stargate;
+import com.bradenn.stargates.structures.stargate.StargateModel;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -58,8 +59,10 @@ public class DestinationItem extends Item {
         lore.forEach((k, v) -> loreStrings.add(StringUtils.format("&7%s: %s", k, v)));
 
         if (!Objects.equals(from.getLocation().getWorld(), to.getWorld())) {
-            itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
-            loreStrings.add(StringUtils.format("&cMK2 Stargate required."));
+            if (!from.getModel().equals(StargateModel.MK2)) {
+                itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+                loreStrings.add(StringUtils.format("&cMK2 Stargate required."));
+            }
         }
 
         itemMeta.setLore(loreStrings);

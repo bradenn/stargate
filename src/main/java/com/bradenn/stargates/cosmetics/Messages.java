@@ -31,6 +31,10 @@ public class Messages {
         player.sendMessage(format(false, message, args));
     }
 
+    public static void sendRaw(Player player, String message, Object... args) {
+        player.sendMessage(StringUtils.format(message, args));
+    }
+
     public static void sendError(Player player, String message, Object... args) {
         player.sendMessage(format(true, message, args));
     }

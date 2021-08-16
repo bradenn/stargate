@@ -15,6 +15,10 @@ public class CreateCommand implements SubCommand {
         return "Build and register a stargate.";
     }
 
+    public Permission getPermission() {
+        return Permission.CREATE;
+    }
+
     public void run(Player player, String[] args) throws Exception {
         if (args.length == 1) {
             throw new Exception("Insufficient arguments.");

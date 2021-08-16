@@ -28,8 +28,6 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
         registerSubCommand(new RemoveCommand());
         registerSubCommand(new PurgeCommand());
         registerSubCommand(new RebuildCommand());
-        registerSubCommand(new RingsCommand());
-        registerSubCommand(new TestCommand());
     }
 
     private void registerSubCommand(SubCommand subCommand) {
@@ -64,7 +62,7 @@ public class StargateCommand implements CommandExecutor, TabCompleter {
             String commandLabel = args[0];
             SubCommand subCommand = getSubCommand(commandLabel);
 
-            if (player.hasPermission(subCommand.getPermission())) {
+            if (player.hasPermission(subCommand.getPermission().getPermissionString())) {
                 subCommand.run(player, args);
             } else {
                 throw new Exception("You lack the permissions to use this command.");

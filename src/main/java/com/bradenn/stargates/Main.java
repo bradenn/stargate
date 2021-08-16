@@ -24,8 +24,8 @@ public class Main extends JavaPlugin {
     private void init() {
         plugin = this;
 
-        this.saveDefaultConfig();
-        this.getServer().getPluginManager().registerEvents(new StargateListener(), this);
+        saveDefaultConfig();
+        getServer().getPluginManager().registerEvents(new StargateListener(), this);
 
         PluginCommand stargateCommand = getCommand("stargate");
         new StargateCommand(stargateCommand);

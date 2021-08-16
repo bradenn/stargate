@@ -10,5 +10,15 @@ commands:
     usage: /stargate
     aliases: sg
 permissions:
-  stargate:
+  stargate.default:
     default: true
+  stargate.create:
+    default: op
+  stargate.seed:
+    default: op
+  stargate.remove:
+    default: op
+  stargate.rebuild:
+    default: op
+  stargate.purge:
+    default: op

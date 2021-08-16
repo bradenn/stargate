@@ -2,11 +2,12 @@ package com.bradenn.stargates.structures;
 
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.Main;
-import com.bradenn.stargates.structures.rings.Rings;
+import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.structures.stargate.Stargate;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
@@ -22,7 +23,7 @@ public class StructureManager {
     public static void init() {
         structureMap = new HashMap<>();
         structureMap.put(Stargate.class, Database.getCollection("stargates"));
-        structureMap.put(Rings.class, Database.getCollection("rings"));
+//        structureMap.put(Rings.class, Database.getCollection("rings"));
     }
 
     public static <T extends Structure> T createStructure(String name, Location base, Class<T> structure) throws Exception {
@@ -30,12 +31,20 @@ public class StructureManager {
         Orientation orientation = Orientation.fromYaw(base.getYaw());
         Location baseOffset = type.getOffset(base, orientation);
         BoundingBox bounds = type.getBounds(base, orientation);
+
+        MongoCollection<Document> collection = structureMap.get(structure);
+        Document queryDocument = collection.find(new Document("name", name)).first();
+        if (queryDocument != null) throw new Exception("A structure with this name already exists.");
+
         return structure.getDeclaredConstructor(String.class, Location.class, BoundingBox.class, Orientation.class).newInstance(name, baseOffset, bounds, orientation);
     }
 
     public static <T extends Structure> T getStructureFromUUID(UUID uuid, Class<T> structure) throws Exception {
         MongoCollection<Document> collection = structureMap.get(structure);
         Document queryDocument = collection.find(new Document("uuid", uuid.toString())).first();
+        if (queryDocument == null) {
+            throw new Exception("Structure could not be found.");
+        }
         return structure.getConstructor(Document.class).newInstance(queryDocument);
     }
 
@@ -50,6 +59,17 @@ public class StructureManager {
 
     private static StructureType matchClass(Class<? extends Structure> structure) {
         return StructureType.valueOf(structure.getSimpleName().toUpperCase());
+    }
+
+    public static void rebuildAllVerbose(Player player) {
+        structureMap.keySet().forEach(structureType -> {
+            Messages.sendInfo(player, "Rebuilding structures of type '%s':", structureType.getSimpleName());
+            getAllStructuresByClass(structureType).forEach(structure -> {
+                double start = System.currentTimeMillis();
+                structure.rebuild();
+                Messages.sendRaw(player, "&7%s (%s) - [%.1fms]", structure.getName(), structure.getWorld().getName(), System.currentTimeMillis() - start);
+            });
+        });
     }
 
     public static void rebuildAll() {

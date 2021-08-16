@@ -1,12 +1,13 @@
 package com.bradenn.stargates.structures.stargate;
 
 import com.bradenn.stargates.Database;
+import com.bradenn.stargates.Main;
 import com.bradenn.stargates.cosmetics.BlockStand;
+import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Port;
 import com.bradenn.stargates.structures.Structure;
-import com.bradenn.stargates.structures.dialer.DialerMenu;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Updates;
 import org.apache.commons.lang.RandomStringUtils;
@@ -18,6 +19,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
@@ -184,13 +186,37 @@ public class Stargate extends Structure implements Port {
      */
     public void summonPlayer(Player player) {
         Location safeTeleport = getLocation().clone().add(0, 1, 0);
-        safeTeleport.getChunk().load();
         safeTeleport.setYaw(getOrientation().playerYaw());
+        safeTeleport.clone().getChunk().load();
 
-        player.teleport(safeTeleport, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        player.setVelocity(getOrientation().translate(0, 0, 0.2));
+
+        if (player.isInsideVehicle()) {
+            Entity vehicle = player.getVehicle();
+
+            assert vehicle != null;
+
+            vehicle.removePassenger(player);
+            vehicle.teleport(safeTeleport.clone(), PlayerTeleportEvent.TeleportCause.PLUGIN);
+
+            player.teleport(safeTeleport.clone(), PlayerTeleportEvent.TeleportCause.PLUGIN);
+
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    vehicle.addPassenger(player);
+                    Messages.sendInfo(player, "Riders: %s.", vehicle.getPassengers().toString());
+                }
+            }.runTaskLater(Main.plugin, 1L);
+
+        }
+
+
     }
 
+    /**
+     * @param player
+     */
     public void departPlayer(Player player) {
 
     }
@@ -251,7 +277,6 @@ public class Stargate extends Structure implements Port {
      * Construct the stargate structure.
      */
     public void build() {
-        if (!getLocation().getChunk().isLoaded()) return;
         double yOffset = 3.25;
 
         World world = getWorld();
@@ -261,7 +286,7 @@ public class Stargate extends Structure implements Port {
         ring.createRing(centerLocation, 34, new Vector(3, 3, 0), getOrientation());
         ring.setMaterial(Material.POLISHED_DEEPSLATE_SLAB);
         ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.005)), 32, new Vector(2.75, 2.75, 0), getOrientation());
-        if (getModel().equals(StargateModel.MK1)) {
+        if (!getModel().equals(StargateModel.MK2)) {
             ring.setMaterial(Material.WAXED_CUT_COPPER_SLAB);
             ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, 0.025)), 8, new Vector(2.85, 2.85, 0), getOrientation());
             ring.createRing(centerLocation.clone().add(getOrientation().translate(0, 0, -0.025)), 8, new Vector(2.85, 2.85, 0), getOrientation());
@@ -274,7 +299,7 @@ public class Stargate extends Structure implements Port {
 
     @Override
     public void rebuild() {
-        if (getLocation().getChunk().isLoaded()) {
+        if (getWorld().isChunkLoaded((int) getLocation().getX() / 16, (int) getLocation().getZ() / 16)) {
             destroy();
             build();
         }
@@ -284,10 +309,9 @@ public class Stargate extends Structure implements Port {
      * Find and remove all structure-related objects.
      */
     public void destroy() {
-
-        Vector v = getOrientation().translate(4, 4, 1);
-        Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(BoundingBox.of(getLocation().clone().add(0, 2.5, 0), v.getX(), v.getY(), v.getZ()), e -> BlockStand.isArmorStand(e, uuid));
-
+        Vector v = getOrientation().translate(3, 3, 0.5);
+        BoundingBox boundingBox = BoundingBox.of(getLocation().clone().add(0, 3, 0), v.getX(), v.getY(), v.getZ());
+        Collection<Entity> nearbyEntities = getWorld().getNearbyEntities(boundingBox, e -> BlockStand.isArmorStand(e, uuid));
         nearbyEntities.forEach(Entity::remove);
     }
 

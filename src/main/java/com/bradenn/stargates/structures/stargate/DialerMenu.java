@@ -1,12 +1,10 @@
-package com.bradenn.stargates.structures.dialer;
+package com.bradenn.stargates.structures.stargate;
 
 import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.inventory.DestinationItem;
 import com.bradenn.stargates.inventory.Menu;
 import com.bradenn.stargates.runtime.Orchestrator;
 import com.bradenn.stargates.runtime.Wormhole;
-import com.bradenn.stargates.structures.stargate.Stargate;
-import com.bradenn.stargates.structures.stargate.StargatePreferences;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -43,7 +41,13 @@ public class DialerMenu extends Menu {
     public void onClick(InventoryClickEvent e) {
         try {
             if (destinations.containsKey(Objects.requireNonNull(e.getCurrentItem()).getItemMeta())) {
-                Wormhole wormhole = new Wormhole(this.stargate, destinations.get(e.getCurrentItem().getItemMeta()), 200);
+                Stargate destination = destinations.get(e.getCurrentItem().getItemMeta());
+                if (!stargate.getWorld().equals(destination.getWorld())) {
+                    if (!stargate.getModel().equals(StargateModel.MK2)) {
+                        throw new Exception("An MK2 Stargate is required for extra-dimensional travel.");
+                    }
+                }
+                Wormhole wormhole = new Wormhole(this.stargate, destination, 200);
                 Orchestrator.addWormhole(wormhole);
             }
         } catch (Exception exception) {
