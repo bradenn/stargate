@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 if ls server &>/dev/null; then
   if screen -list | grep -q "stargateServerThread"; then
