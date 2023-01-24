@@ -1,10 +1,13 @@
 package com.bradenn.stargates;
 
 import com.bradenn.stargates.cosmetics.BlockStand;
+import com.bradenn.stargates.cosmetics.Messages;
+import com.bradenn.stargates.cosmetics.StringUtils;
 import com.bradenn.stargates.inventory.Menu;
 import com.bradenn.stargates.runtime.Orchestrator;
 import com.bradenn.stargates.structures.Structure;
 import com.bradenn.stargates.structures.StructureManager;
+import com.bradenn.stargates.structures.stargate.RemoteMenu;
 import com.bradenn.stargates.structures.stargate.Stargate;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -13,7 +16,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
@@ -50,6 +56,28 @@ public class StargateListener implements Listener {
         Vector locB = b.getLocation().toVector();
         Vector locC = c.getLocation().toVector();
         return (int) (locA.distance(locC) - locB.distance(locC));
+    }
+
+    @EventHandler
+    public void compassInteract(PlayerInteractEvent e) {
+
+        ItemStack itemStack = e.getItem();
+        if (itemStack == null) return;
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) return;
+
+        if (!itemMeta.hasDisplayName()) return;
+        String name = itemMeta.getDisplayName();
+
+        if (name.contains(StringUtils.format("&bRemote Dialer"))) {
+            try {
+                RemoteMenu remoteMenu = new RemoteMenu(e.getPlayer());
+                remoteMenu.showMenu(e.getPlayer());
+            } catch (Exception exception) {
+                Messages.sendError(e.getPlayer(), exception.getMessage());
+            }
+        }
     }
 
     @EventHandler

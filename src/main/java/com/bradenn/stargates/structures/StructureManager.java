@@ -110,7 +110,7 @@ public class StructureManager {
     }
 
     public enum StructureType {
-        STARGATE(new Vector(0, -0.5, 0), new Vector(0.5, 2.5, 0.5), new Vector(1.75, 1.75, -0.33)),
+        STARGATE(new Vector(0, -0.5, 0), new Vector(0.5, 2.5, 0.5), new Vector(2, 2, 0.25)),
         DIALER(new Vector(3, -0.5, 2), new Vector(3, 1, 2), new Vector(1, 1, 1)),
         RINGS(new Vector(0, -0.75, 0), new Vector(0, 1, 0), new Vector(3, 2, 3));
 
@@ -127,8 +127,10 @@ public class StructureManager {
         }
 
         public BoundingBox getBounds(Location base, Orientation orientation) {
-            Location offsetBase = base.clone().add(orientation.translate(boundsOffset.getX(), boundsOffset.getY(), boundsOffset.getZ()));
-            return BoundingBox.of(offsetBase, bounds.getX(), bounds.getY(), bounds.getZ());
+            Location center = base.getBlock().getLocation().clone();
+            Location offsetBase = center.add(orientation.translate(boundsOffset.getX(), boundsOffset.getY(), boundsOffset.getZ()));
+            Vector offsetBounds = orientation.translate(bounds.getX(), bounds.getY(), bounds.getZ());
+            return BoundingBox.of(offsetBase, offsetBounds.getX(), offsetBounds.getY(), offsetBounds.getZ());
         }
 
 

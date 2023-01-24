@@ -3,7 +3,6 @@ package com.bradenn.stargates.structures.stargate;
 import com.bradenn.stargates.Database;
 import com.bradenn.stargates.Main;
 import com.bradenn.stargates.cosmetics.BlockStand;
-import com.bradenn.stargates.cosmetics.Messages;
 import com.bradenn.stargates.cosmetics.ParticleEffects;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Port;
@@ -16,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -107,6 +107,14 @@ public class Stargate extends Structure implements Port {
         return stargates;
     }
 
+    static public final double map(double value,
+                                   double istart,
+                                   double istop,
+                                   double ostart,
+                                   double ostop) {
+        return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+    }
+
     /**
      * Serialize the stargate object into a database document.
      */
@@ -154,6 +162,8 @@ public class Stargate extends Structure implements Port {
         return model;
     }
 
+    // Port
+
     public void setModel(StargateModel stargateModel) {
 
         Database.getCollection("stargates").findOneAndUpdate(new Document("uuid", this.getUUID().toString()), Updates.set("model", stargateModel.serialize()));
@@ -162,8 +172,6 @@ public class Stargate extends Structure implements Port {
         assert stargate != null;
         stargate.rebuild();
     }
-
-    // Port
 
     public BoundingBox getTriggerArea() {
         return getBoundingBox();
@@ -177,6 +185,16 @@ public class Stargate extends Structure implements Port {
 
     }
 
+    public void renderTrigger() {
+        Location center = getLocation().clone().add(0, 3, 0);
+        World world = center.getWorld();
+        if (Objects.isNull(world)) return;
+
+        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.BLUE.getColor(), 2);
+
+
+    }
+
     public void idle() {
         renderPortal();
     }
@@ -186,28 +204,23 @@ public class Stargate extends Structure implements Port {
      */
     public void summonPlayer(Player player) {
         Location safeTeleport = getLocation().clone().add(0, 1, 0);
-        safeTeleport.setYaw(getOrientation().playerYaw());
-        safeTeleport.clone().getChunk().load();
 
+        safeTeleport.clone().getChunk().load();
+        safeTeleport.setYaw(getOrientation().playerYaw());
 
         if (player.isInsideVehicle()) {
-            Entity vehicle = player.getVehicle();
-
+            Boat vehicle = (Boat) player.getVehicle();
             assert vehicle != null;
 
-            vehicle.removePassenger(player);
-            vehicle.teleport(safeTeleport.clone(), PlayerTeleportEvent.TeleportCause.PLUGIN);
-
+            vehicle.teleport(safeTeleport.clone());
+            vehicle.getLocation().setY(getOrientation().playerYaw());
             player.teleport(safeTeleport.clone(), PlayerTeleportEvent.TeleportCause.PLUGIN);
 
+            vehicle.addPassenger(player);
 
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    vehicle.addPassenger(player);
-                    Messages.sendInfo(player, "Riders: %s.", vehicle.getPassengers().toString());
-                }
-            }.runTaskLater(Main.plugin, 1L);
+        } else {
+
+            player.teleport(safeTeleport.clone(), PlayerTeleportEvent.TeleportCause.PLUGIN);
 
         }
 
@@ -229,24 +242,42 @@ public class Stargate extends Structure implements Port {
         World world = center.getWorld();
         if (Objects.isNull(world)) return;
 
-        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.BLUE.getColor(), 3);
-        for (double t = 0; t < 14 * Math.PI - (Math.PI / 2); t += (Math.PI / 16)) {
-            double r = t / 16;
-            double posX = Math.cos(t) * r;
-            double posY = Math.sin(t) * r;
-            Vector adjusted = getOrientation().translate(posX, posY, 0);
-            world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, blueDust);
+        Particle.DustOptions blueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.BLUE.getColor(), 2);
+        Particle.DustOptions lightBlueDust = new Particle.DustOptions(ParticleEffects.ParticleColor.LIGHT_BLUE.getColor(), 2);
+
+        new BukkitRunnable() {
+            final double phi = (Math.sqrt(5) + 1) / 2;
+            double k = 0;
+
+            @Override
+            public void run() {
+                if (k > n) cancel();
+
+                for (int i = 0; i < 50; i++) {
+                    k++;
+                    double t = 2 * Math.PI * k / (Math.pow(phi, 2));
+                    double r = sunflowerRadius(k, n, b);
+                    double posX = Math.cos(t) * (r * 2.75);
+                    double posY = Math.sin(t) * (r * 2.75);
+                    Vector adjusted = getOrientation().translate(posX, posY, 0);
+                    world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, i % 2 == 0 ? blueDust : lightBlueDust);
+                }
+
+            }
+
+            final double a = 2, n = 500, b = Math.round(a * Math.sqrt(n));
+
+
+        }.runTaskTimer(Main.plugin, 0, 1);
+
+    }
+
+    public double sunflowerRadius(double k, double n, double b) {
+        if (k > n - b) {
+            return 1;
+        } else {
+            return Math.sqrt(k - 1.0 / 2) / Math.sqrt(n - (b + 1) / 2);
         }
-//        for (double j = 0; j < 3; j += 0.2) {
-//            double particleCount = 4 * j;
-//            for (double i = 0; i < particleCount; i += 0.2) {
-//                double delta = (Math.PI * 2) / particleCount;
-//                double posX = Math.cos(delta * i) * j;
-//                double posY = Math.sin(delta * i) * j;
-//                Vector adjusted = getOrientation().translate(posX, posY, 0);
-//                world.spawnParticle(Particle.REDSTONE, center.clone().add(adjusted.getX(), adjusted.getY(), adjusted.getZ()), 1, blueDust);
-//            }
-//        }
     }
 
     /**

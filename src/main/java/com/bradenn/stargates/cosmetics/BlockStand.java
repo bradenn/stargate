@@ -1,5 +1,6 @@
 package com.bradenn.stargates.cosmetics;
 
+import com.bradenn.stargates.Main;
 import com.bradenn.stargates.structures.Orientation;
 import com.bradenn.stargates.structures.Structure;
 import org.bukkit.Location;
@@ -9,6 +10,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
@@ -49,6 +51,23 @@ public class BlockStand {
         world.spawn(location.clone().add(x, y - 1.4375, z), ArmorStand.class, this::configureArmorStand);
     }
 
+    public void smallMutableBlockAt(Location location, EulerAngle angle) {
+        this.angle = angle;
+        double xRad = (Math.PI * angle.getX()) / 180;
+        double zRad = (Math.PI * angle.getZ()) / 180;
+        double x = (Math.sin(zRad) * Math.cos(xRad)) * -0.25;
+        double y = (Math.cos(xRad) * Math.cos(zRad)) * -0.25;
+        double z = Math.sin(xRad) * -0.25;
+        Entity e = world.spawn(location.clone().add(x, y - 1.4375, z), ArmorStand.class, this::configureArmorStand);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                e.remove();
+                e.setVisualFire(true);
+            }
+        }.runTaskLater(Main.plugin, 5);
+    }
+
     public void createRing(Location center, double count, Vector size, boolean offset) {
         double unit = (Math.PI * 2) / count;
         double off = offset ? unit / 2 : 0;
@@ -68,6 +87,18 @@ public class BlockStand {
             double angle = -unit * i + Math.PI;
 
             smallBlockAt(center.clone().add(orientation.translate(dx, dy, i * 5E-4)), orientation.translateAngle(0, 0, angle));
+        }
+    }
+
+    public void createRotatingRing(Location center, double count, Vector size, Orientation orientation) {
+        double unit = (Math.PI * 2) / count;
+        for (double i = 0; i < count; i++) {
+            double dx = Math.cos(unit * i - Math.PI / 2) * size.getX();
+            double dy = Math.sin(unit * i - Math.PI / 2) * size.getY();
+            double angle = -unit * i + Math.PI;
+            smallMutableBlockAt(center.clone().add(orientation.translate(dx, dy, i * 5E-4)), orientation.translateAngle(0, 0, angle));
+
+
         }
     }
 
