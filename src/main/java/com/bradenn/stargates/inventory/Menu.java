@@ -13,8 +13,12 @@ public abstract class Menu implements InventoryHolder {
 
     private final InventoryType inventoryType;
     private final int slots;
-    private final String title;
+    private String title;
     protected Inventory inventory;
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public Menu(String title, InventoryType inventoryType) {
         this.inventoryType = inventoryType;
